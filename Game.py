@@ -80,10 +80,10 @@ class Game:
             div = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA']
             leag = []
         elif self.division == "ALC":
-            div = ALC = ['CLE', 'MIN', 'DET', 'CWS', 'KCR']
+            div = ['CLE', 'MIN', 'DET', 'CWS', 'KCR']
             leag = []
         elif self.division == "ALE":
-            div = ['NYY', 'TBR', 'TOR', 'BOS', 'BAL']
+            div = ['NYY', 'TBD', 'TBR', 'TOR', 'BOS', 'BAL']
             leag = []
         elif self.division == "NLW":
             div = ['LAD', 'SDP', 'COL', 'ARI', 'SFG']
@@ -96,7 +96,7 @@ class Game:
             leag = []
         elif self.division == "AL":
             div = []
-            leag = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TOR', 'BOS', 'BAL']
+            leag = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TBD', 'TOR', 'BOS', 'BAL']
         elif self.division == "NL":
             div = []
             leag = ['LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
@@ -105,25 +105,35 @@ class Game:
             leag = []
 
         if len(div) > 0:
-            self.division = list(div)
-            self.player1.teams_needed = list(div)
-            self.player2.teams_needed = list(div)
-            if self.numPlayers > 2:
-                self.player3.teams_needed = list(div)
-                if self.numPlayers > 3:
-                    self.player4.teams_needed = list(div)
+            #self.division = list(div)
+            self.division_adj = list(div)
+            if self.division == "ALE":
+                self.division_adj.remove('TBD')
+                self.player1.teams_needed = list(self.division_adj)
+                self.player2.teams_needed = list(self.division_adj)
+                if self.numPlayers > 2:
+                    self.player3.teams_needed = list(self.division_adj)
+                    if self.numPlayers > 3:
+                        self.player4.teams_needed = list(self.division_adj)
+            else:
+                self.player1.teams_needed = list(self.division_adj)
+                self.player2.teams_needed = list(self.division_adj)
+                if self.numPlayers > 2:
+                    self.player3.teams_needed = list(self.division_adj)
+                    if self.numPlayers > 3:
+                        self.player4.teams_needed = list(self.division_adj)
         elif len(leag) > 0:
-            self.division = list(leag)
+            self.division_adj = list(leag)
         else:
-            self.division = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TOR', 'BOS', 'BAL', 'LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
-
+            self.division_adj = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TOR', 'BOS', 'BAL', 'LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
 
     def startGame(self):
-        if (len(self.division) == 5) & (self.numPlayers == 2):
+        print(f'DIVISION {self.division}, LENGTH {len(self.division)}, NUMPLAYERS: {self.numPlayers}')
+        if ((len(self.division_adj) == 5) or (len(self.division_adj) == 6)) & (self.numPlayers == 2):
             self.root.geometry("1200x420")
-        elif (len(self.division) == 5) & (self.numPlayers == 3):
+        elif ((len(self.division_adj) == 5) or (len(self.division_adj) == 6)) & (self.numPlayers == 3):
             self.root.geometry("1500x420")
-        elif (len(self.division) == 5) & (self.numPlayers == 4):
+        elif ((len(self.division_adj) == 5) or (len(self.division_adj) == 6)) & (self.numPlayers == 4):
             self.root.geometry("1800x420")
         elif self.numPlayers == 2:
             self.root.geometry("1200x350")
@@ -163,7 +173,8 @@ class Game:
                 break
             objects = []
             self.weird_case = False
-            self.turn(center_frame, player[i], objects)
+            if i < len(player):
+                self.turn(center_frame, player[i], objects)
             print('exit')
             
             if not self.exit:
@@ -274,7 +285,7 @@ class Game:
                     player4_obj.append(ttk.Label(right_frame, text = f'{pos[i]}:'))
                     player4_obj[i].grid(row = i + 1, column = 1, padx = 25, pady = 5)
             
-        if len(self.division) == 5:
+        if (len(self.division_adj) == 5) or (len(self.division_adj) == 6):
             player1_obj.append(Label(player1_frame, text = 'Teams Needed', font = ('Fixedsys', 10), fg = '#39957b'))
             player1_obj[10].grid(row = 11, column = 0, padx = 25, pady = 5)
             player1_obj.append(Label(player1_frame, text = f'{", ".join(self.player1.teams_needed)}', font = ('Fixedsys', 10), fg = '#39957b'))
@@ -316,10 +327,11 @@ class Game:
             self.loop2.set(False)
             self.loop3.set(False)
 
+            objects.append(Label(center_frame, text = f'{self.start_year}-{self.end_year} {self.division}', font=('System', 28)))
             objects.append(Label(center_frame, text = f'{player.name}\'s Selection', font=('System', 28), fg = '#39957b'))
             objects.append(Label(center_frame, text = "Select Player", font=('Helvetica', 20)))
             objects.append(Label(center_frame, text = "EX: (1994 Michael Jordan)", font=('Helvetica', 10)))
-            objects.append(ttk.Entry(center_frame))
+            objects.append(ttk.Entry(center_frame)) #WAS objects[3] -> objects[4]
             objects.append(ttk.Button(center_frame, text = "Confirm", command = lambda: self.verify_entry(player, objects)))
             objects.append(Label(center_frame, text = "", fg = 'yellow'))
 
@@ -329,7 +341,9 @@ class Game:
 
             for i, obj in enumerate(objects):
                 if i == 0:
-                    obj.grid(row = i, column = 0, padx = 5, pady = 25)
+                    obj.grid(row = i, column = 0, padx = 5, pady = 10)
+                elif i == 1:
+                    obj.grid(row = i, column = 0, padx = 5, pady = 10)
                 else:
                     obj.grid(row = i, column = 0, padx = 5, pady = 5)
 
@@ -355,6 +369,11 @@ class Game:
                         val = player_batting_stats[self.stat].iloc[0]
                     player.temp_ab = player_batting_stats['AB'].iloc[0]
                     player.temp_team = player_batting_stats['Team'].iloc[0]
+                    if player.temp_team == "TBD":
+                        player.temp_team = "TBR"
+
+                    #print(f'PLAYER TEMP TEAM: {player.temp_team}')
+
                     games_played = player_fielding_stats['G'].sum()
                     player_fielding_stats = player_fielding_stats.loc[season_fielding_stats['G'] / games_played >= 0.2]
                     player_fielding_stats = player_fielding_stats.reset_index(drop = True)
@@ -362,14 +381,14 @@ class Game:
                     positions = player_fielding_stats['Pos']
 
                     print(f'TEST: {self.division}, {player.temp_team}')
-                    if player.temp_team not in self.division:
+                    if player.temp_team not in self.division_adj:
                         helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
                         objects.append(Button(center_frame, text = "Select New Player", font=('Helvetica', 12), command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                        objects[3].destroy()
+                        objects[4].destroy()
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                     elif (player.temp_team not in player.teams_needed) & (player.rem_turns == len(player.teams_needed)):
                         helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}', row = len(objects) - 1)
-                        objects[3].destroy()
+                        objects[4].destroy()
                         objects.append(Button(center_frame, text = "Select New Player", font=('Helvetica', 12), command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                     else:
@@ -454,7 +473,7 @@ class Game:
                                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
                                 objects.append(ttk.Entry(center_frame))
                                 objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
-                                objects.append(ttk.Button(center_frame, text = "Confirm Position", command = lambda: self.verify_position(adj_pos, pos, objects)))
+                                objects.append(ttk.Button(center_frame, text = "Confirm Position", command = lambda: self.verify_position(adj_pos, objects)))
                                 objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
                                 objects.append(Label(center_frame, text = "", fg = 'yellow'))
                                 #print("Made it to wait variable 3")
@@ -503,11 +522,11 @@ class Game:
                     if player.temp_team not in self.division:
                         helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
                         objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                        objects[3].destroy()
+                        objects[4].destroy()
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                     elif (player.temp_team not in player.teams_needed) & (player.rem_turns == len(player.teams_needed)):
                         helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}', row = len(objects) - 1)
-                        objects[3].destroy()
+                        objects[4].destroy()
                         objects.append(Button(center_frame, text = "Select New Player", font=('Helvetica', 12), command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                     else:
@@ -525,17 +544,17 @@ class Game:
                         if (pos[0] == 'RP') & (num_starters == 9):
                             helper.throw_error(objects[-1], message = f"Error: {player.temp_name} is not a SP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                            objects[3].destroy()
+                            objects[4].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                         elif (pos[0] == 'RP') & (player.num_rp == 4):
                             helper.throw_error(objects[-1], message = f"Error: Max number of RP reached. Please select a SP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                            objects[3].destroy()
+                            objects[4].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                         elif (pos[0] == 'SP') & (player.num_sp == 5) & (num_starters == 5):
                             helper.throw_error(objects[-1], message = f"Error: Max number of SP reached. Please select a RP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                            objects[3].destroy()
+                            objects[4].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                         else:
                             for i in range(1, len(objects)):
@@ -576,34 +595,34 @@ class Game:
 
     def verify_entry(self, player, objects):
         #print('Verify Entry Called')
-        if len(objects[3].get().split(' ', 1)) > 1:
-            if objects[3].get().split(' ', 1)[0].isdigit():
-                year = objects[3].get().split(' ', 1)[0]
-                name = objects[3].get().split(' ', 1)[1]
+        if len(objects[4].get().split(' ', 1)) > 1:
+            if objects[4].get().split(' ', 1)[0].isdigit():
+                year = objects[4].get().split(' ', 1)[0]
+                name = objects[4].get().split(' ', 1)[1]
             else:
                 helper.throw_error(objects[-1], message = "Error: Check format of entry.", row = len(objects) - 1)
-                objects[3].delete(0, END)
+                objects[4].delete(0, END)
                 return
         else:
             helper.throw_error(objects[-1], message = "Error: Check format of entry.", row = len(objects) - 1)
-            objects[3].delete(0, END)
+            objects[4].delete(0, END)
             return
 
         if (int(year) < self.start_year) or (int(year) > self.end_year):
             helper.throw_error(objects[-1], message = "Error: Year out of range.", row = len(objects) - 1)
-            objects[3].delete(0, END)
+            objects[4].delete(0, END)
             return
         
         if name in self.picked_players:
             helper.throw_error(objects[-1], message = "Error: Player already selected.", row = len(objects) - 1)
-            objects[3].delete(0, END)
+            objects[4].delete(0, END)
             return
 
         self.loop1.set(True)
         player.temp_name = name
         player.temp_year = year
 
-    def verify_position(self, positions, pos, objects):
+    def verify_position(self, positions, objects):
         print('Verify Positions Called')
         print(objects[4].get(), positions)
         if objects[4].get() not in positions:
@@ -697,7 +716,7 @@ class Game:
             player.total += val
             player.player_objects[9].config(text = f'Total: {round(player.total, 1)}')
 
-        if len(self.division) == 5:
+        if len(self.division_adj) == 5:
             if player.temp_team in player.teams_needed: 
                 player.teams_needed.remove(player.temp_team)
             player.player_objects[11].config(text = f'{", ".join(player.teams_needed)}')
@@ -757,17 +776,17 @@ class Game:
                 player.rp1.total = val
                 if self.stat == 'ERA': player.player_objects[5].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
                 else: player.player_objects[5].config(text = f'RP: {player.temp_name} [{val}]')
-            elif player.num_sp == 1:
+            elif player.num_rp == 1:
                 player.rp2.name = player.temp_name
                 player.rp2.total = val
                 if self.stat == 'ERA': player.player_objects[6].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
                 else: player.player_objects[6].config(text = f'RP: {player.temp_name} [{val}]')
-            elif player.num_sp == 2:
+            elif player.num_rp == 2:
                 player.rp3.name = player.temp_name
                 player.rp3.total = val
                 if self.stat == 'ERA': player.player_objects[7].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
                 else: player.player_objects[7].config(text = f'RP: {player.temp_name} [{val}]')
-            elif player.num_sp == 3:
+            elif player.num_rp == 3:
                 player.rp4.name = player.temp_name
                 player.rp4.total = val
                 if self.stat == 'ERA': player.player_objects[8].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
