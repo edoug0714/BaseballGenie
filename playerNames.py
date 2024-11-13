@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import ttk
 import sv_ttk
-import gameSetup
 import helper
 
 def test_input(numPlayers, division, stat, startYear, endYear, root):
