@@ -168,37 +168,6 @@ def gameSetup():
 
     root.mainloop()
 
-    if division.get() == "ALW":
-        if (start_year.get() < 1970):
-            division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'SEA']
-        elif (start_year.get() > 1969) & (start_year.get() < 1972):
-            division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'MIL']
-        elif (start_year.get() > 1971) & (start_year.get() < 1977):
-            division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX']
-        elif (start_year.get() > 1976) & (start_year.get() < 2005):
-            division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'SEA', 'TEX']
-        elif (start_year.get() > 2004) & (start_year.get() < 2013):
-            division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX']
-        elif (start_year.get() > 2004) & (start_year.get() < 2013):
-            division = ['LAA', 'OAK', 'SEA', 'TEX']
-        elif (start_year.get() > 2012):
-            division = ['HOU', 'LAA', 'OAK', 'SEA', 'TEX']
-    elif division.get() == "ALC":
-        if (start_year.get() < 1998):
-            division = ['CWS', 'CLE', 'KCR', 'MIL', 'MIN']
-        elif (start_year.get() > 1997):
-            division = ['CWS', 'CLE', 'DET', 'KCR', 'MIN']
-    elif division.get() == "ALE":
-        if (start_year.get() < 1972):
-            ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS']
-        elif (start_year.get() > 1971) & (start_year.get() < 1977):
-            division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY']
-        elif (start_year.get() > 1976) & (start_year.get() < 1994):
-            division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
-        elif (start_year.get() > 1976) & (start_year.get() < 1994):
-            division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
-    
-
     list.append(numPlayers.get())
     list.append(division.get())
     list.append(stat.get())
