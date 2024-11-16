@@ -63,6 +63,10 @@ class Game:
         self.stat = inputs[2]
         self.start_year = inputs[3]
         self.end_year = inputs[4]
+
+        self.batter_data = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\merged_batter_data.csv").fillna(0)
+        self.batter_data.drop(columns=self.batter_data.columns[0], axis=1, inplace=True)
+
         self.create_players(names)
         self.set_division()
         self.startGame()
@@ -125,7 +129,7 @@ class Game:
         elif len(leag) > 0:
             self.division_adj = list(leag)
         else:
-            self.division_adj = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TOR', 'BOS', 'BAL', 'LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
+            self.division_adj = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CHW', 'KCR', 'NYY', 'TBR', 'TOR', 'BOS', 'BAL', 'LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
 
     def startGame(self):
         print(f'DIVISION {self.division}, LENGTH {len(self.division)}, NUMPLAYERS: {self.numPlayers}')
@@ -353,8 +357,10 @@ class Game:
                 print('While loop 2 called')
                 if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
                     season_batting_stats = pyb.batting_stats(player.temp_year, ind = 1, qual = 50)
+                    season_batting_stats = season_batting_stats.sort_values(by = [self.stat])
                     season_fielding_stats = pyb.fielding_stats(player.temp_year, qual = 1, ind = 1)
                     player_batting_stats = season_batting_stats[season_batting_stats['Name'] == player.temp_name]
+                    player_batting_stats.to_csv('output.csv')
                     player_fielding_stats = season_fielding_stats[season_fielding_stats['Name'] == player.temp_name]
 
                     if len(player_batting_stats) == 0:
@@ -377,7 +383,7 @@ class Game:
                     games_played = player_fielding_stats['G'].sum()
                     player_fielding_stats = player_fielding_stats.loc[season_fielding_stats['G'] / games_played >= 0.2]
                     player_fielding_stats = player_fielding_stats.reset_index(drop = True)
-                    player_fielding_stats.to_csv('output.csv')
+                    #season_batting_stats.to_csv('output.csv')
                     positions = player_fielding_stats['Pos']
 
                     print(f'TEST: {self.division}, {player.temp_team}')
@@ -519,7 +525,7 @@ class Game:
                     #print(f'{player.temp_name}, {val}, {player.temp_ip}, {player.temp_ip_disp}')
 
                     #print(f'TEST: {self.division}, {player.temp_team}')
-                    if player.temp_team not in self.division:
+                    if player.temp_team not in self.division_adj:
                         helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
                         objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[4].destroy()
