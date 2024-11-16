@@ -4,12 +4,13 @@ import playerNames
 import pybaseball as pyb
 from tkinter import ttk
 from tkinter import *
+import pandas as pd
 import sv_ttk
     
 def main():
 
     while True:
-        inputs = [2, "ALW", "W", 2020, 2024]
+        inputs = [2, "ALW", "H", 2020, 2024]
         #inputs = gameSetup.gameSetup()
         #if inputs[0] == -1:
             #break
@@ -38,23 +39,27 @@ def test():
     season_pitching_stats.to_csv('output.csv')
 
 def test1():
-    root = Tk()
-    root.geometry("300x200")
+    data = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\merged_batter_data.csv").fillna(0)
+    data.drop(columns=data.columns[0], axis=1, inplace=True)
 
-    # Apply the theme
-    sv_ttk.set_theme("dark")  # Options: "dark" or "light"
+    year = 1965
+    franchise = 'LAA'
 
-    frame = ttk.Frame(root, borderwidth = 1)
-    frame.pack()
+    #player_data = data[(data['Season'] == year) & (data['Name'] == name)]
+    #player_data = player_data[player_data['G_by_pos'] / player_data['G'] >= 0.2]
 
-    # Create a sample button to show the theme
-    btn = ttk.Button(frame, text="Click Me")
-    btn.pack(pady=20)
+    player_data = data[(data['Season'] == year) & (data['Franchise'] == franchise)]
+    print(player_data)
 
-    root.mainloop()
+    #pos = player_data['Pos'].tolist()
+
+    #if (len(pos) == 0) or (pos == ['P']):
+        #pos = ['DH']
     
 
-main()
+    
+
+#main()
 #test()
-#test1()
+test1()
 
