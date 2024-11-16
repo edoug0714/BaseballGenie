@@ -581,8 +581,65 @@ class Game:
                 division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY']
             elif (year > 1976) & (year < 1994):
                 division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
-            elif (year > 1976) & (year < 1994):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
+            elif (year > 1993) & (year < 1998):
+                division = ['BAL', 'BOS', 'DET', 'NYY', 'TOR']
+            elif (year > 1997) & (year < 2008):
+                division = ['BAL', 'BOS', 'NYY', 'TBD', 'TOR']
+            elif (year > 2007):
+                division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR']
+        elif division.get() == "NLW":
+            if (year < 1992):
+                division = ['ATL', 'CIN', 'HOU', 'LAD', 'SDP', 'SFG']
+            elif (year > 1991) & (year < 1993):
+                division = ['ATL', 'CIN', 'COL', 'HOU', 'LAD', 'SDP', 'SFG']
+            elif (year > 1992) & (year < 1998):
+                division = ['COL', 'LAD', 'SDP', 'SFG']
+            elif (year > 1997):
+                division = ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        elif division.get() == "NLC":
+            if (year < 1998):
+                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
+            if (year > 1997) & (year < 2013):
+                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
+            if (year > 2012):
+                division = ['CHC', 'CIN', 'MIL', 'PIT', 'STL']
+        elif division.get() == "NLE":
+            if (year < 1993):
+                division = ['CHC', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
+            elif (year > 1992) & (year < 1994):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
+            elif (year > 1993) & (year < 2005):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI']
+            elif (year > 2004) & (year < 2012):
+                division = ['ATL', 'FLA', 'NYM', 'PHI', 'WAS']
+            elif (year > 2011):
+                division = ['ATL', 'MIA', 'NYM', 'PHI', 'WAS']
+        elif division == "AL":
+            if (year < 1902):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'MIL', 'PHI', 'WAS']
+            elif (year > 1901) & (year < 1903):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'PHI', 'STL', 'WAS']
+            elif (year > 1902) & (year < 1913):
+                division = ['BOS', 'CWS', 'CLE', 'DET', 'NYH', 'PHI', 'STL', 'WAS']
+            elif (year > 1912) & (year < 1954):
+                division = ['BOS', 'CWS', 'CLE', 'DET', 'NYY', 'PHI', 'STL', 'WAS']
+            elif (year > 1953) & (year < 1955):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'NYY', 'PHI', 'WAS']
+            elif (year > 1954) & (year < 1961):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'KCA', 'NYY', 'WAS']
+            elif (year > 1960) & (year < 1965):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'KCA', 'LAA', 'MIN', 'NYY', 'WAS']
+            elif (year > 1964) & (year < 1968):
+                division = ['BAL', 'BOS', 'CAL', 'CWS', 'CLE', 'DET', 'KCA', 'MIN', 'NYY', 'WAS']
+            elif (year > 1967) & (year < 1969):
+                division = ['BAL', 'BOS', 'CAL', 'CWS', 'CLE', 'DET', 'MIN', 'NYY', 'OAK', 'WAS']
+            elif (year > 1968) & (year < 1970):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CWS', 'KCR', 'MIN', 'OAK',' SEA']
+            elif (year > 1969) & (year < 1972):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CWS', 'KCR', 'MIN', 'MIL',' OAK']
+            elif (year > 1971) & (year < 1977):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX'] 
+
 
 
     def verify_entry(self, player, objects):
