@@ -19,7 +19,7 @@ def set_stat(value, stat, button, prevButton, success):
     stat.set(value)
     prevButton[0] = button
 
-def set_years(start_year, end_year, year1_entry, year2_entry, root, success1, success2, error_label):
+def set_years(start_year, end_year, year1_entry, year2_entry, root, success1, success2, error_label, division):
     #Check for num_players entry
     if success1.get() != "1":
         helper.throw_error(error_label, message = "Error: Please select number of players.")
@@ -36,6 +36,9 @@ def set_years(start_year, end_year, year1_entry, year2_entry, root, success1, su
     if year2_entry.get() == "":
         helper.throw_error(error_label, message = "Error: Please enter year values.")
         return
+    if not (year1_entry.get().isnumeric() or (year2_entry.get().isnumeric())):
+        helper.throw_error(error_label, message = "Error: Years must be formatted as numbers.")
+        return
 
     start_year.set(year1_entry.get())
     end_year.set(year2_entry.get())
@@ -45,11 +48,21 @@ def set_years(start_year, end_year, year1_entry, year2_entry, root, success1, su
     if start_year.get() > CURR_YEAR:
         helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from the future.")
         return
-    if end_year.get() < 1850:
-        helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from before 1850.")
+    if end_year.get() < 1901:
+        helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from before 1901.")
         return
-    if start_year.get() < 1850:
-        start_year.set(1850)
+    if (division.get() in ["ALW", "ALC", "ALE", "NLW", "NLC", "NLE"]) & (end_year.get() < 1969):
+        helper.throw_error(error_label, message = f"Error: Divisions did not exist before 1969.")
+        return
+    if (division.get() in ["ALC", "NLC"]) & (end_year.get() < 1994):
+        helper.throw_error(error_label, message = "Error: Central divisions did not exist before 1994.")
+        return
+    if division in ["ALC", "NLC"]:
+        if start_year.get() < 1994:
+            start_year.set(1993)
+    else:
+        if start_year.get() < 1901:
+            start_year.set(1901)
     if end_year.get() > 2024:
         end_year.set(2024)
 
@@ -150,7 +163,7 @@ def gameSetup():
     error_frame = Frame(root)
     error_frame.pack(pady = 2)
     error_label = Label(error_frame, text = "", fg = 'yellow')
-    confirm_button = ttk.Button(confirm_frame, text = "Confirm Settings", command = lambda: set_years(start_year, end_year, year1_entry, year2_entry, root, success1, success2, error_label))
+    confirm_button = ttk.Button(confirm_frame, text = "Confirm Settings", command = lambda: set_years(start_year, end_year, year1_entry, year2_entry, root, success1, success2, error_label, division))
     confirm_button.pack(pady = 5)
 
     root.mainloop()

@@ -63,8 +63,12 @@ class Game:
         self.stat = inputs[2]
         self.start_year = inputs[3]
         self.end_year = inputs[4]
+
+        self.batter_data = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\merged_batter_data.csv").fillna(0)
+        self.batter_data.drop(columns=self.batter_data.columns[0], axis=1, inplace=True)
+
         self.create_players(names)
-        self.set_division()
+        self.set_division_tf()
         self.startGame()
 
     def create_players(self, names):
@@ -75,65 +79,18 @@ class Game:
             if self.numPlayers > 3:
                 self.player4 = Player(names[3])
 
-    def set_division(self):
-        if self.division == "ALW":
-            div = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA']
-            leag = []
-        elif self.division == "ALC":
-            div = ['CLE', 'MIN', 'DET', 'CWS', 'KCR']
-            leag = []
-        elif self.division == "ALE":
-            div = ['NYY', 'TBD', 'TBR', 'TOR', 'BOS', 'BAL']
-            leag = []
-        elif self.division == "NLW":
-            div = ['LAD', 'SDP', 'COL', 'ARI', 'SFG']
-            leag = []
-        elif self.division == "NLC":
-            div = ['PIT', 'CIN', 'STL', 'MIL', 'CHC']
-            leag = []
-        elif self.division == "NLE":
-            div = ['WSN', 'NYM', 'PHI', 'MIA', 'ATL']
-            leag = []
-        elif self.division == "AL":
-            div = []
-            leag = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TBD', 'TOR', 'BOS', 'BAL']
-        elif self.division == "NL":
-            div = []
-            leag = ['LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
+    def set_division_tf(self):
+        if self.division in ['MLB', 'AL', 'NL']:
+            self.division_tf = False
         else:
-            div = []
-            leag = []
-
-        if len(div) > 0:
-            #self.division = list(div)
-            self.division_adj = list(div)
-            if self.division == "ALE":
-                self.division_adj.remove('TBD')
-                self.player1.teams_needed = list(self.division_adj)
-                self.player2.teams_needed = list(self.division_adj)
-                if self.numPlayers > 2:
-                    self.player3.teams_needed = list(self.division_adj)
-                    if self.numPlayers > 3:
-                        self.player4.teams_needed = list(self.division_adj)
-            else:
-                self.player1.teams_needed = list(self.division_adj)
-                self.player2.teams_needed = list(self.division_adj)
-                if self.numPlayers > 2:
-                    self.player3.teams_needed = list(self.division_adj)
-                    if self.numPlayers > 3:
-                        self.player4.teams_needed = list(self.division_adj)
-        elif len(leag) > 0:
-            self.division_adj = list(leag)
-        else:
-            self.division_adj = ['HOU', 'TEX', 'LAA', 'OAK', 'SEA', 'CLE', 'MIN', 'DET', 'CWS', 'KCR', 'NYY', 'TBR', 'TOR', 'BOS', 'BAL', 'LAD', 'SDP', 'COL', 'ARI', 'SFG', 'PIT', 'CIN', 'STL', 'MIL', 'CHC','WSN', 'NYM', 'PHI', 'MIA', 'ATL']
+            self.division_tf = True
 
     def startGame(self):
-        print(f'DIVISION {self.division}, LENGTH {len(self.division)}, NUMPLAYERS: {self.numPlayers}')
-        if ((len(self.division_adj) == 5) or (len(self.division_adj) == 6)) & (self.numPlayers == 2):
+        if (self.division_tf) & (self.numPlayers == 2):
             self.root.geometry("1200x420")
-        elif ((len(self.division_adj) == 5) or (len(self.division_adj) == 6)) & (self.numPlayers == 3):
+        elif (self.division_tf) & (self.numPlayers == 3):
             self.root.geometry("1500x420")
-        elif ((len(self.division_adj) == 5) or (len(self.division_adj) == 6)) & (self.numPlayers == 4):
+        elif (self.division_tf) & (self.numPlayers == 4):
             self.root.geometry("1800x420")
         elif self.numPlayers == 2:
             self.root.geometry("1200x350")
@@ -285,7 +242,7 @@ class Game:
                     player4_obj.append(ttk.Label(right_frame, text = f'{pos[i]}:'))
                     player4_obj[i].grid(row = i + 1, column = 1, padx = 25, pady = 5)
             
-        if (len(self.division_adj) == 5) or (len(self.division_adj) == 6):
+        if self.division_tf:
             player1_obj.append(Label(player1_frame, text = 'Teams Needed', font = ('Fixedsys', 10), fg = '#39957b'))
             player1_obj[10].grid(row = 11, column = 0, padx = 25, pady = 5)
             player1_obj.append(Label(player1_frame, text = f'{", ".join(self.player1.teams_needed)}', font = ('Fixedsys', 10), fg = '#39957b'))
@@ -351,10 +308,13 @@ class Game:
 
             while self.loop2.get() == False:
                 print('While loop 2 called')
+
                 if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
                     season_batting_stats = pyb.batting_stats(player.temp_year, ind = 1, qual = 50)
+                    season_batting_stats = season_batting_stats.sort_values(by = [self.stat])
                     season_fielding_stats = pyb.fielding_stats(player.temp_year, qual = 1, ind = 1)
                     player_batting_stats = season_batting_stats[season_batting_stats['Name'] == player.temp_name]
+                    player_batting_stats.to_csv('output.csv')
                     player_fielding_stats = season_fielding_stats[season_fielding_stats['Name'] == player.temp_name]
 
                     if len(player_batting_stats) == 0:
@@ -377,7 +337,7 @@ class Game:
                     games_played = player_fielding_stats['G'].sum()
                     player_fielding_stats = player_fielding_stats.loc[season_fielding_stats['G'] / games_played >= 0.2]
                     player_fielding_stats = player_fielding_stats.reset_index(drop = True)
-                    player_fielding_stats.to_csv('output.csv')
+                    #season_batting_stats.to_csv('output.csv')
                     positions = player_fielding_stats['Pos']
 
                     print(f'TEST: {self.division}, {player.temp_team}')
@@ -519,7 +479,7 @@ class Game:
                     #print(f'{player.temp_name}, {val}, {player.temp_ip}, {player.temp_ip_disp}')
 
                     #print(f'TEST: {self.division}, {player.temp_team}')
-                    if player.temp_team not in self.division:
+                    if player.temp_team not in self.division_adj:
                         helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
                         objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[4].destroy()
@@ -592,6 +552,95 @@ class Game:
         self.loop2.set(True)
         self.exit = True
         quit(self.root)
+
+    def set_year(self, year):
+        if division.get() == "ALW":
+            if (year < 1970):
+                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'SEA']
+            elif (year > 1969) & (year < 1972):
+                division = ['CAL', 'CWS', 'KCR', 'MIN', 'MIL', 'OAK']
+            elif (year > 1971) & (year < 1977):
+                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX']
+            elif (year > 1976) & (year < 2005):
+                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'SEA', 'TEX']
+            elif (year > 2004) & (year < 2013):
+                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX']
+            elif (year > 2004) & (year < 2013):
+                division = ['LAA', 'OAK', 'SEA', 'TEX']
+            elif (year > 2012):
+                division = ['HOU', 'LAA', 'OAK', 'SEA', 'TEX']
+        elif division.get() == "ALC":
+            if (year < 1998):
+                division = ['CWS', 'CLE', 'KCR', 'MIL', 'MIN']
+            elif (year > 1997):
+                division = ['CWS', 'CLE', 'DET', 'KCR', 'MIN']
+        elif division.get() == "ALE":
+            if (year < 1972):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS']
+            elif (year > 1971) & (year < 1977):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY']
+            elif (year > 1976) & (year < 1994):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
+            elif (year > 1993) & (year < 1998):
+                division = ['BAL', 'BOS', 'DET', 'NYY', 'TOR']
+            elif (year > 1997) & (year < 2008):
+                division = ['BAL', 'BOS', 'NYY', 'TBD', 'TOR']
+            elif (year > 2007):
+                division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR']
+        elif division.get() == "NLW":
+            if (year < 1992):
+                division = ['ATL', 'CIN', 'HOU', 'LAD', 'SDP', 'SFG']
+            elif (year > 1991) & (year < 1993):
+                division = ['ATL', 'CIN', 'COL', 'HOU', 'LAD', 'SDP', 'SFG']
+            elif (year > 1992) & (year < 1998):
+                division = ['COL', 'LAD', 'SDP', 'SFG']
+            elif (year > 1997):
+                division = ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        elif division.get() == "NLC":
+            if (year < 1998):
+                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
+            if (year > 1997) & (year < 2013):
+                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
+            if (year > 2012):
+                division = ['CHC', 'CIN', 'MIL', 'PIT', 'STL']
+        elif division.get() == "NLE":
+            if (year < 1993):
+                division = ['CHC', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
+            elif (year > 1992) & (year < 1994):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
+            elif (year > 1993) & (year < 2005):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI']
+            elif (year > 2004) & (year < 2012):
+                division = ['ATL', 'FLA', 'NYM', 'PHI', 'WAS']
+            elif (year > 2011):
+                division = ['ATL', 'MIA', 'NYM', 'PHI', 'WAS']
+        elif division == "AL":
+            if (year < 1902):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'MIL', 'PHI', 'WAS']
+            elif (year > 1901) & (year < 1903):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'PHI', 'STL', 'WAS']
+            elif (year > 1902) & (year < 1913):
+                division = ['BOS', 'CWS', 'CLE', 'DET', 'NYH', 'PHI', 'STL', 'WAS']
+            elif (year > 1912) & (year < 1954):
+                division = ['BOS', 'CWS', 'CLE', 'DET', 'NYY', 'PHI', 'STL', 'WAS']
+            elif (year > 1953) & (year < 1955):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'NYY', 'PHI', 'WAS']
+            elif (year > 1954) & (year < 1961):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'KCA', 'NYY', 'WAS']
+            elif (year > 1960) & (year < 1965):
+                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'KCA', 'LAA', 'MIN', 'NYY', 'WAS']
+            elif (year > 1964) & (year < 1968):
+                division = ['BAL', 'BOS', 'CAL', 'CWS', 'CLE', 'DET', 'KCA', 'MIN', 'NYY', 'WAS']
+            elif (year > 1967) & (year < 1969):
+                division = ['BAL', 'BOS', 'CAL', 'CWS', 'CLE', 'DET', 'MIN', 'NYY', 'OAK', 'WAS']
+            elif (year > 1968) & (year < 1970):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CWS', 'KCR', 'MIN', 'OAK',' SEA']
+            elif (year > 1969) & (year < 1972):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CWS', 'KCR', 'MIN', 'MIL',' OAK']
+            elif (year > 1971) & (year < 1977):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX'] 
+
+
 
     def verify_entry(self, player, objects):
         #print('Verify Entry Called')
