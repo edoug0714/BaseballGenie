@@ -3,6 +3,7 @@ from tkinter import ttk
 import sv_ttk
 import pybaseball as pyb
 import pandas as pd
+import numpy as np
 import helper
 
 class Pick:
@@ -57,6 +58,8 @@ class Game:
     def __init__(self, root, inputs, names):
         self.root = root
         self.play_again = False
+        self.prev_player = ""
+        self.prev_division = []
         self.picked_players = []
         self.numPlayers = inputs[0]
         self.division = inputs[1]
@@ -64,8 +67,15 @@ class Game:
         self.start_year = inputs[3]
         self.end_year = inputs[4]
 
-        self.batter_data = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\merged_batter_data.csv").fillna(0)
-        self.batter_data.drop(columns=self.batter_data.columns[0], axis=1, inplace=True)
+        if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
+            self.data = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\merged_batter_data.csv").fillna(0)
+            self.data.drop(columns=self.data.columns[0], axis=1, inplace=True)
+            self.season_name = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\season_name_batters.csv").fillna(0)
+            self.season_name = self.season_name['x'].tolist()
+        else:
+            self.data = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\merged_pitcher_data.csv").fillna(0)
+            self.season_name = pd.read_csv("C:\\Users\edoug\Code\Python\MLBDraft\season_name_pitchers.csv").fillna(0)
+            self.season_name = self.season_name['x'].tolist()
 
         self.create_players(names)
         self.set_division_tf()
@@ -73,11 +83,15 @@ class Game:
 
     def create_players(self, names):
         self.player1 = Player(names[0])
+        self.player1.teams_needed = self.set_division(2024)
         self.player2 = Player(names[1])
+        self.player2.teams_needed = self.set_division(2024)
         if self.numPlayers > 2:
             self.player3 = Player(names[2])
+            self.player3.teams_needed = self.set_division(2024)
             if self.numPlayers > 3:
                 self.player4 = Player(names[3])
+                self.player4.teams_needed = self.set_division(2024)
 
     def set_division_tf(self):
         if self.division in ['MLB', 'AL', 'NL']:
@@ -86,18 +100,12 @@ class Game:
             self.division_tf = True
 
     def startGame(self):
-        if (self.division_tf) & (self.numPlayers == 2):
-            self.root.geometry("1200x420")
-        elif (self.division_tf) & (self.numPlayers == 3):
-            self.root.geometry("1500x420")
-        elif (self.division_tf) & (self.numPlayers == 4):
-            self.root.geometry("1800x420")
-        elif self.numPlayers == 2:
-            self.root.geometry("1200x350")
+        if self.numPlayers == 2:
+            self.root.geometry("1200x500")
         elif self.numPlayers == 3:
-            self.root.geometry("1500x350")
+            self.root.geometry("1500x500")
         else:
-            self.root.geometry("1800x350")
+            self.root.geometry("1800x500")
         sv_ttk.set_theme('dark')
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close)
 
@@ -177,9 +185,6 @@ class Game:
         button.grid(row = 5, column = 0, padx = 5, pady = 5)
         center_frame.wait_variable(balls)
         print("Made it past BALLS WALL")
-
-        #self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-        #self.root.mainloop()
 
     def orient_screen(self, left_frame, right_frame):
         if self.numPlayers == 2:
@@ -267,16 +272,60 @@ class Game:
         return player_objects
 
     def turn(self, center_frame, player, objects):
+        class AutoCompleteDropdown(Game):
+            def __init__(self, game_instance, frame, options):
+                self.game = game_instance
+                self.options = options
+                self.filtered_options = []
+                objects.append(ttk.Entry(frame, width=30)) #SELF.ENTRY NOW OBJECTS[4]
+                objects[4].grid(row = 4, column = 0, pady = 10)
+                objects[4].bind("<KeyRelease>", self.update_list)
+                objects.append(Listbox(frame, width=30, height = 3, activestyle="dotbox", bd = 0)) #SELF.LISTBOX NOW OBJECTS[5]
+
+                objects[5].grid(row = 5, column = 0, pady = 10)
+
+                objects[5].bind("<<ListboxSelect>>", self.select_option)
+                objects[5].configure(background="#1c1c1c", foreground="white", selectbackground="#0078d7", selectforeground="white")
+                objects.append(ttk.Button(frame, text="Confirm", command = lambda: (self.confirm_selection()))) #SELF.CONFIRM_BUTTON NOWW OBJECTS[6]
+
+                objects[6].grid(row = 6, column = 0, pady = 10)
+
+            def update_list(self, event=None):
+                typed_text = objects[4].get().lower()
+
+                if len(typed_text) >= 4:
+                    self.filtered_options = [option for option in self.options if typed_text in option.lower()]
+
+                    objects[5].delete(0, END) 
+                    for option in self.filtered_options:
+                        objects[5].insert(END, option)
+
+                else:
+                    objects[5].delete(0, END)
+
+            def select_option(self, event):
+                selection = objects[5].curselection()
+                if selection:
+                    selected_option = objects[5].get(selection[0])
+                    objects[4].delete(0, END)
+                    objects[4].insert(0, selected_option)
+                    objects[5].grid_forget()
+
+            def confirm_selection(self):
+                year = objects[4].get().split(' ', 1)[0]
+                name = objects[4].get().split(' ', 1)[1]
+                player.temp_name = name
+                player.temp_year = int(year)
+                self.game.loop1.set(True)
+
         print(f'Called turn() - Player {player.name}\'s Turn')
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-
         self.loop1 = BooleanVar(self.root)
         self.loop2 = BooleanVar(self.root)
         self.loop3 = BooleanVar(self.root)
         self.loop1.set(False)
         self.loop2.set(False)
         self.loop3.set(False)
-        player_dne = False
         while self.loop1.get() == False:
             print('While loop 1 called')
 
@@ -288,13 +337,6 @@ class Game:
             objects.append(Label(center_frame, text = f'{player.name}\'s Selection', font=('System', 28), fg = '#39957b'))
             objects.append(Label(center_frame, text = "Select Player", font=('Helvetica', 20)))
             objects.append(Label(center_frame, text = "EX: (1994 Michael Jordan)", font=('Helvetica', 10)))
-            objects.append(ttk.Entry(center_frame)) #WAS objects[3] -> objects[4]
-            objects.append(ttk.Button(center_frame, text = "Confirm", command = lambda: self.verify_entry(player, objects)))
-            objects.append(Label(center_frame, text = "", fg = 'yellow'))
-
-            if player_dne:
-                helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = len(objects) - 1)
-            player_dne = False
 
             for i, obj in enumerate(objects):
                 if i == 0:
@@ -304,61 +346,104 @@ class Game:
                 else:
                     obj.grid(row = i, column = 0, padx = 5, pady = 5)
 
+            self.acd = AutoCompleteDropdown(self, center_frame, self.season_name)
+
+            print(self.prev_player)
+            if self.prev_player != "":
+                player_stats = self.data
+                player_stats = player_stats[player_stats['Name'] == self.prev_player]
+                season_stats = player_stats[(player_stats['Season'] >= self.start_year) & (player_stats['Season'] <= self.end_year)]
+                season_stats = season_stats[season_stats['Team'].isin(self.prev_division)]
+                if self.stat == 'ERA':
+                    season_stats = season_stats.sort_values(by = self.stat, ascending = True).drop_duplicates(subset = 'Season', keep = 'first')
+                else:
+                    season_stats = season_stats.sort_values(by = self.stat, ascending = False).drop_duplicates(subset = 'Season', keep = 'first')
+                if len(season_stats) != 0:
+                    objects.append(ttk.Label(center_frame, text = f'Top 3 {self.prev_player} seasons:'))
+                    objects[-1].grid(row = 7, column = 0, padx = 5, pady = 10)
+                    if self.stat == 'ERA':
+                        objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {round(season_stats[self.stat].iloc[0], 2):.2f}     {season_stats['Season'].iloc[1]}: {round(season_stats[self.stat].iloc[1], 2):.2f}     {season_stats['Season'].iloc[2]}: {round(season_stats[self.stat].iloc[2], 2):.2f}"))
+                    elif self.stat == 'AVG':
+                        objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {round(season_stats[self.stat].iloc[0], 3):.2f}     {season_stats['Season'].iloc[1]}: {round(season_stats[self.stat].iloc[1], 3):.2f}     {season_stats['Season'].iloc[2]}: {round(season_stats[self.stat].iloc[2], 3):.2f}"))
+                    else:
+                        objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {season_stats[self.stat].iloc[0]}     {season_stats['Season'].iloc[1]}: {season_stats[self.stat].iloc[1]}     {season_stats['Season'].iloc[2]}: {season_stats[self.stat].iloc[2]}"))
+                    objects[-1].grid(row = 8, column = 0, padx = 5, pady = 5)
+                    objects.append(Label(center_frame, text = "", fg = 'yellow'))
+                    objects[-1].grid(row = 9, column = 0, padx = 5, pady = 5)
+                else:
+                    objects.append(Label(center_frame, text = "", fg = 'yellow'))
+                    objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
+            else:
+                objects.append(Label(center_frame, text = "", fg = 'yellow'))
+                objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
+
             center_frame.wait_variable(self.loop1)
 
             while self.loop2.get() == False:
                 print('While loop 2 called')
+                division = self.set_division(player.temp_year)
+                self.picked_players.append(player.temp_name)
 
                 if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
-                    season_batting_stats = pyb.batting_stats(player.temp_year, ind = 1, qual = 50)
-                    season_batting_stats = season_batting_stats.sort_values(by = [self.stat])
-                    season_fielding_stats = pyb.fielding_stats(player.temp_year, qual = 1, ind = 1)
-                    player_batting_stats = season_batting_stats[season_batting_stats['Name'] == player.temp_name]
-                    player_batting_stats.to_csv('output.csv')
-                    player_fielding_stats = season_fielding_stats[season_fielding_stats['Name'] == player.temp_name]
+                    player_batting_stats = self.data
+                    player_batting_stats = player_batting_stats[player_batting_stats['Name'] == player.temp_name]
+                    season_batting_stats = player_batting_stats[player_batting_stats['Season'] == player.temp_year]
+                    teams = season_batting_stats['Team'].unique()
+                    common_teams_div = np.intersect1d(teams, division)
+                    common_teams_need = np.intersect1d(teams, player.teams_needed)
+                    print(teams)
+                    print(player.teams_needed)
+                    print(common_teams_need)
+                    print(len(common_teams_need))
 
                     if len(player_batting_stats) == 0:
-                        self.loop2.set(True)
-                        self.loop1.set(False)
-                        player_dne = True
-                        break
-
-                    if self.stat == "AVG":
-                        val = player_batting_stats['H'].iloc[0]
-                    else:
-                        val = player_batting_stats[self.stat].iloc[0]
-                    player.temp_ab = player_batting_stats['AB'].iloc[0]
-                    player.temp_team = player_batting_stats['Team'].iloc[0]
-                    if player.temp_team == "TBD":
-                        player.temp_team = "TBR"
-
-                    #print(f'PLAYER TEMP TEAM: {player.temp_team}')
-
-                    games_played = player_fielding_stats['G'].sum()
-                    player_fielding_stats = player_fielding_stats.loc[season_fielding_stats['G'] / games_played >= 0.2]
-                    player_fielding_stats = player_fielding_stats.reset_index(drop = True)
-                    #season_batting_stats.to_csv('output.csv')
-                    positions = player_fielding_stats['Pos']
-
-                    print(f'TEST: {self.division}, {player.temp_team}')
-                    if player.temp_team not in self.division_adj:
-                        helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
-                        objects.append(Button(center_frame, text = "Select New Player", font=('Helvetica', 12), command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                        helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = len(objects) - 1)
+                        objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[4].destroy()
+                        objects[5].destroy()
+                        objects[6].destroy()
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
-                    elif (player.temp_team not in player.teams_needed) & (player.rem_turns == len(player.teams_needed)):
+                    elif len(common_teams_div) == 0:
+                        helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
+                        objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                        objects[4].destroy()
+                        objects[5].destroy()
+                        objects[6].destroy()
+                        objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+                    elif (len(common_teams_need) == 0) & (player.rem_turns == len(player.teams_needed)):
                         helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}', row = len(objects) - 1)
                         objects[4].destroy()
-                        objects.append(Button(center_frame, text = "Select New Player", font=('Helvetica', 12), command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                        objects[5].destroy()
+                        objects[6].destroy()
+                        objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                     else:
+                        season_batting_stats = season_batting_stats[season_batting_stats['Team'].isin(common_teams_div)]
+                        if player.rem_turns == len(player.teams_needed):
+                            season_batting_stats = season_batting_stats[season_batting_stats['Team'].isin(common_teams_need)]
+                        season_batting_stats = season_batting_stats.sort_values(by = [self.stat], ascending = False)
+                        if self.stat == "AVG":
+                            val = season_batting_stats['H'].iloc[0]
+                        else:
+                            val = season_batting_stats[self.stat].iloc[0]
+                        player.temp_team = season_batting_stats['Team'].iloc[0]
+                        player.temp_ab = season_batting_stats['AB'].iloc[0]
+
+                        season_batting_stats = season_batting_stats[season_batting_stats['G_by_pos'] / season_batting_stats['G'] >= 0.2]
+                        season_batting_stats = season_batting_stats.reset_index()
+                        positions = season_batting_stats['Pos']
+                        print(positions)
                         pos = []
                         for i in range(len(positions)):
+                            print(i)
                             pos.append(positions[i])
 
                         for i in range(1, len(objects)):
                             objects[i].destroy()
                         objects = objects[:1]
+
+                        if 'DH' in pos:
+                            pos.remove('DH')
 
                         if len(pos) == 0:
                             pos.append('DH')
@@ -413,14 +498,14 @@ class Game:
                                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
                                 pos.clear()
                                 pos.append("DH")
-                                objects.append(ttk.Button(center_frame, text = "Use as DH", command = lambda: self.select_player(player, pos, val)))
+                                objects.append(ttk.Button(center_frame, text = "Use as DH", command = lambda: self.select_player(player, pos, val, division)))
                                 objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                                 objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                                 objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
                         elif(len(adj_pos) == 1):
                             objects.append(Label(center_frame, text = f'You have {", ".join(adj_pos)} available.'))
                             objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
-                            objects.append(ttk.Button(center_frame, text = f'Use as {", ".join(adj_pos)}', command = lambda: self.select_player(player, adj_pos, val)))
+                            objects.append(ttk.Button(center_frame, text = f'Use as {", ".join(adj_pos)}', command = lambda: self.select_player(player, adj_pos, val, division)))
                             objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
@@ -429,16 +514,21 @@ class Game:
                                 print('While loop 3 called')
                                 objects.append(Label(center_frame, text = f'You have {", ".join(adj_pos)} available.'))
                                 objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
-                                objects.append(Label(center_frame, text = f'Enter position you would like {player.temp_name} at.'))
+                                objects.append(Label(center_frame, text = f'Select position you would like {player.temp_name} at.'))
                                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
-                                objects.append(ttk.Entry(center_frame))
+
+                                objects.append(ttk.Button(center_frame, text = adj_pos[0], command = lambda: self.verify_position(adj_pos, adj_pos[0], objects)))
                                 objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
-                                objects.append(ttk.Button(center_frame, text = "Confirm Position", command = lambda: self.verify_position(adj_pos, objects)))
+                                objects.append(ttk.Button(center_frame, text = adj_pos[1], command = lambda: self.verify_position(adj_pos, adj_pos[1], objects)))
                                 objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
-                                objects.append(Label(center_frame, text = "", fg = 'yellow'))
-                                #print("Made it to wait variable 3")
+                                if len(adj_pos) > 2:
+                                    objects.append(ttk.Button(center_frame, text = adj_pos[2], command = lambda: self.verify_position(adj_pos, adj_pos[2], objects)))
+                                    objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                                    if len(adj_pos) > 3:
+                                        objects.append(ttk.Button(center_frame, text = adj_pos[3], command = lambda: self.verify_position(adj_pos, adj_pos[3], objects)))
+                                        objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
+
                                 center_frame.wait_variable(self.loop3)
-                                #print("Made it past variable 3")
 
                             self.weird_case = True
 
@@ -449,72 +539,85 @@ class Game:
                 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
                 else:
-                    season_pitching_stats = pyb.pitching_stats(player.temp_year, ind = 1, qual = 1)
-                    player_pitching_stats = season_pitching_stats[season_pitching_stats['Name'] == player.temp_name]
-                    player_pitching_stats.to_csv('output.csv')
+                    player_pitching_stats = self.data
+                    player_pitching_stats = player_pitching_stats[player_pitching_stats['Name'] == player.temp_name]
+                    season_pitching_stats = player_pitching_stats[player_pitching_stats['Season'] == player.temp_year]
+                    teams = season_pitching_stats['Team'].unique()
+                    common_teams_div = np.intersect1d(teams, division)
+                    common_teams_need = np.intersect1d(teams, player.teams_needed)
 
+                    print(player_pitching_stats)
+                    print(len(player_pitching_stats))
 
                     if len(player_pitching_stats) == 0:
-                        self.loop2.set(True)
-                        self.loop1.set(False)
-                        player_dne = True
-                        print("Broke out")
-                        break
-
-
-                    if self.stat == "ERA":
-                        val = player_pitching_stats['ER'].iloc[0]
-                    elif self.stat == "PWAR":
-                        val = player_pitching_stats['WAR'].iloc[0]
-                    else:
-                        val = player_pitching_stats[self.stat].iloc[0]
-                    player.temp_ip = player_pitching_stats['IP'].iloc[0]
-                    print(round(player.temp_ip, 1) - int(player.temp_ip))
-                    player.temp_ip_disp = round(player.temp_ip, 1)
-                    if round(player.temp_ip, 1) - int(player.temp_ip) > 0.15:
-                        player.temp_ip = int(player.temp_ip) + 0.67
-                    elif player.temp_ip - int(player.temp_ip) > 0.05:
-                        player.temp_ip = int(player.temp_ip) + 0.33
-                    player.temp_team = player_pitching_stats['Team'].iloc[0]
-                    #print(f'{player.temp_name}, {val}, {player.temp_ip}, {player.temp_ip_disp}')
-
-                    #print(f'TEST: {self.division}, {player.temp_team}')
-                    if player.temp_team not in self.division_adj:
+                        helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = len(objects) - 1)
+                        objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                        objects[4].destroy()
+                        objects[5].destroy()
+                        objects[6].destroy()
+                        objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+                    elif len(common_teams_div) == 0:
                         helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = len(objects) - 1)
                         objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[4].destroy()
+                        objects[5].destroy()
+                        objects[6].destroy()
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
-                    elif (player.temp_team not in player.teams_needed) & (player.rem_turns == len(player.teams_needed)):
+                    elif (len(common_teams_need) == 0) & (player.rem_turns == len(player.teams_needed)):
                         helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}', row = len(objects) - 1)
                         objects[4].destroy()
-                        objects.append(Button(center_frame, text = "Select New Player", font=('Helvetica', 12), command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                        objects[5].destroy()
+                        objects[6].destroy()
+                        objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                     else:
+                        season_pitching_stats = season_pitching_stats[season_pitching_stats['Team'].isin(common_teams_div)]
+                        if player.rem_turns == len(player.teams_needed):
+                            season_pitching_stats = season_pitching_stats[season_pitching_stats['Team'].isin(common_teams_need)]
+                        season_pitching_stats = season_pitching_stats.sort_values(by = [self.stat], ascending = False)
+                        if self.stat == "ERA":
+                            val = season_pitching_stats['ER'].iloc[0]
+                        elif self.stat == "PWAR":
+                            val = season_pitching_stats['WAR'].iloc[0]
+                        else:
+                            val = season_pitching_stats[self.stat].iloc[0]
+                        player.temp_team = season_pitching_stats['Team'].iloc[0]
+                        player.temp_ip = season_pitching_stats['IP'].iloc[0]
+
+                        for i in range(1, len(objects)):
+                            objects[i].destroy()
+                        objects = objects[:1]
+
                         pos = []
                         if player_pitching_stats['GS'].iloc[0] == 0:
                             pos.append('RP')
                         else:
                             pos.append('SP')
-                        
+                            
                         if self.stat in ['W']:
                             num_starters = 9
                         else:
                             num_starters = 5
-
                         if (pos[0] == 'RP') & (num_starters == 9):
                             helper.throw_error(objects[-1], message = f"Error: {player.temp_name} is not a SP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[4].destroy()
+                            objects[5].destroy()
+                            objects[6].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                         elif (pos[0] == 'RP') & (player.num_rp == 4):
                             helper.throw_error(objects[-1], message = f"Error: Max number of RP reached. Please select a SP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[4].destroy()
+                            objects[5].destroy()
+                            objects[6].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                         elif (pos[0] == 'SP') & (player.num_sp == 5) & (num_starters == 5):
                             helper.throw_error(objects[-1], message = f"Error: Max number of SP reached. Please select a RP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[4].destroy()
+                            objects[5].destroy()
+                            objects[6].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                         else:
                             for i in range(1, len(objects)):
@@ -523,7 +626,7 @@ class Game:
 
                             objects.append(Label(center_frame, text = f'{player.temp_year} {player.temp_name} is eligible at {", ".join(pos)}'))
                             objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
-                            objects.append(ttk.Button(center_frame, text = f'Use as {", ".join(pos)}', command = lambda: self.select_pitcher(player, pos, val)))
+                            objects.append(ttk.Button(center_frame, text = f'Use as {", ".join(pos)}', command = lambda: self.select_pitcher(player, pos, val, division)))
                             objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
@@ -531,10 +634,12 @@ class Game:
 
 #----------------------------------------------------------------------------
                 if self.weird_case:
-                    objects.append(ttk.Button(center_frame, text = f'Confirm', command = lambda: self.select_player(player, adj_pos, val)))
+                    objects.append(ttk.Label(center_frame, text = f'Select {player.temp_name} at {", ".join(adj_pos)}.'))
                     objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
-                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    objects.append(ttk.Button(center_frame, text = f'Confirm', command = lambda: self.select_player(player, adj_pos, val, division)))
                     objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
+                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
                 print("Made it to wait variable 2")
                 center_frame.wait_variable(self.loop2)
                 print("Made it past variable 2")
@@ -552,95 +657,6 @@ class Game:
         self.loop2.set(True)
         self.exit = True
         quit(self.root)
-
-    def set_year(self, year):
-        if division.get() == "ALW":
-            if (year < 1970):
-                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'SEA']
-            elif (year > 1969) & (year < 1972):
-                division = ['CAL', 'CWS', 'KCR', 'MIN', 'MIL', 'OAK']
-            elif (year > 1971) & (year < 1977):
-                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX']
-            elif (year > 1976) & (year < 2005):
-                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'SEA', 'TEX']
-            elif (year > 2004) & (year < 2013):
-                division = ['CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX']
-            elif (year > 2004) & (year < 2013):
-                division = ['LAA', 'OAK', 'SEA', 'TEX']
-            elif (year > 2012):
-                division = ['HOU', 'LAA', 'OAK', 'SEA', 'TEX']
-        elif division.get() == "ALC":
-            if (year < 1998):
-                division = ['CWS', 'CLE', 'KCR', 'MIL', 'MIN']
-            elif (year > 1997):
-                division = ['CWS', 'CLE', 'DET', 'KCR', 'MIN']
-        elif division.get() == "ALE":
-            if (year < 1972):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS']
-            elif (year > 1971) & (year < 1977):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY']
-            elif (year > 1976) & (year < 1994):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
-            elif (year > 1993) & (year < 1998):
-                division = ['BAL', 'BOS', 'DET', 'NYY', 'TOR']
-            elif (year > 1997) & (year < 2008):
-                division = ['BAL', 'BOS', 'NYY', 'TBD', 'TOR']
-            elif (year > 2007):
-                division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR']
-        elif division.get() == "NLW":
-            if (year < 1992):
-                division = ['ATL', 'CIN', 'HOU', 'LAD', 'SDP', 'SFG']
-            elif (year > 1991) & (year < 1993):
-                division = ['ATL', 'CIN', 'COL', 'HOU', 'LAD', 'SDP', 'SFG']
-            elif (year > 1992) & (year < 1998):
-                division = ['COL', 'LAD', 'SDP', 'SFG']
-            elif (year > 1997):
-                division = ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
-        elif division.get() == "NLC":
-            if (year < 1998):
-                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
-            if (year > 1997) & (year < 2013):
-                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
-            if (year > 2012):
-                division = ['CHC', 'CIN', 'MIL', 'PIT', 'STL']
-        elif division.get() == "NLE":
-            if (year < 1993):
-                division = ['CHC', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
-            elif (year > 1992) & (year < 1994):
-                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
-            elif (year > 1993) & (year < 2005):
-                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI']
-            elif (year > 2004) & (year < 2012):
-                division = ['ATL', 'FLA', 'NYM', 'PHI', 'WAS']
-            elif (year > 2011):
-                division = ['ATL', 'MIA', 'NYM', 'PHI', 'WAS']
-        elif division == "AL":
-            if (year < 1902):
-                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'MIL', 'PHI', 'WAS']
-            elif (year > 1901) & (year < 1903):
-                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'PHI', 'STL', 'WAS']
-            elif (year > 1902) & (year < 1913):
-                division = ['BOS', 'CWS', 'CLE', 'DET', 'NYH', 'PHI', 'STL', 'WAS']
-            elif (year > 1912) & (year < 1954):
-                division = ['BOS', 'CWS', 'CLE', 'DET', 'NYY', 'PHI', 'STL', 'WAS']
-            elif (year > 1953) & (year < 1955):
-                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'NYY', 'PHI', 'WAS']
-            elif (year > 1954) & (year < 1961):
-                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'KCA', 'NYY', 'WAS']
-            elif (year > 1960) & (year < 1965):
-                division = ['BAL', 'BOS', 'CWS', 'CLE', 'DET', 'KCA', 'LAA', 'MIN', 'NYY', 'WAS']
-            elif (year > 1964) & (year < 1968):
-                division = ['BAL', 'BOS', 'CAL', 'CWS', 'CLE', 'DET', 'KCA', 'MIN', 'NYY', 'WAS']
-            elif (year > 1967) & (year < 1969):
-                division = ['BAL', 'BOS', 'CAL', 'CWS', 'CLE', 'DET', 'MIN', 'NYY', 'OAK', 'WAS']
-            elif (year > 1968) & (year < 1970):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CWS', 'KCR', 'MIN', 'OAK',' SEA']
-            elif (year > 1969) & (year < 1972):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CWS', 'KCR', 'MIN', 'MIL',' OAK']
-            elif (year > 1971) & (year < 1977):
-                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'CAL', 'CWS', 'KCR', 'MIN', 'OAK', 'TEX'] 
-
-
 
     def verify_entry(self, player, objects):
         #print('Verify Entry Called')
@@ -669,23 +685,150 @@ class Game:
 
         self.loop1.set(True)
         player.temp_name = name
-        player.temp_year = year
-
-    def verify_position(self, positions, objects):
-        print('Verify Positions Called')
-        print(objects[4].get(), positions)
-        if objects[4].get() not in positions:
-            helper.throw_error(objects[-1], message = "Error: Please enter valid position.", row = len(objects) - 1)
-            objects[4].delete(0, END)
-            return
+        player.temp_year = int(year)
+    
+    def set_division(self, year):
+        if self.division == "ALW":
+            if (year < 1970):
+                division = ['CAL', 'CHW', 'KCR', 'MIN', 'OAK', 'SEA']
+            elif (year > 1969) & (year < 1972):
+                division = ['CAL', 'CHW', 'KCR', 'MIN', 'MIL', 'OAK']
+            elif (year > 1971) & (year < 1977):
+                division = ['CAL', 'CHW', 'KCR', 'MIN', 'OAK', 'TEX']
+            elif (year > 1976) & (year < 1994):
+                division = ['CAL', 'CHW', 'KCR', 'MIN', 'OAK', 'SEA', 'TEX']
+            elif (year > 1993) & (year < 1997):
+                division = ['CAL', 'OAK', 'SEA', 'TEX']
+            elif (year > 1996) & (year < 2005):
+                division = ['ANA', 'OAK', 'SEA', 'TEX']
+            elif (year > 2004) & (year < 2013):
+                division = ['LAA', 'OAK', 'SEA', 'TEX']
+            elif (year > 2012):
+                division = ['HOU', 'LAA', 'OAK', 'SEA', 'TEX']
+        elif self.division == "ALC":
+            if (year < 1998):
+                division = ['CHW', 'CLE', 'KCR', 'MIL', 'MIN']
+            elif (year > 1997):
+                division = ['CHW', 'CLE', 'DET', 'KCR', 'MIN']
+        elif self.division == "ALE":
+            if (year < 1972):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS']
+            elif (year > 1971) & (year < 1977):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY']
+            elif (year > 1976) & (year < 1994):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR']
+            elif (year > 1993) & (year < 1998):
+                division = ['BAL', 'BOS', 'DET', 'NYY', 'TOR']
+            elif (year > 1997) & (year < 2008):
+                division = ['BAL', 'BOS', 'NYY', 'TBD', 'TOR']
+            elif (year > 2007):
+                division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR']
+        elif self.division == "NLW":
+            if (year < 1993):
+                division = ['ATL', 'CIN', 'HOU', 'LAD', 'SDP', 'SFG']
+            elif (year > 1992) & (year < 1994):
+                division = ['ATL', 'CIN', 'COL', 'HOU', 'LAD', 'SDP', 'SFG']
+            elif (year > 1993) & (year < 1998):
+                division = ['COL', 'LAD', 'SDP', 'SFG']
+            elif (year > 1997):
+                division = ['ARI', 'COL', 'LAD', 'SDP', 'SFG']
+        elif self.division == "NLC":
+            if (year < 1998):
+                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
+            if (year > 1997) & (year < 2013):
+                division = ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL']
+            if (year > 2012):
+                division = ['CHC', 'CIN', 'MIL', 'PIT', 'STL']
+        elif self.division == "NLE":
+            if (year < 1993):
+                division = ['CHC', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
+            elif (year > 1992) & (year < 1994):
+                division = ['CHC', 'FLA', 'MON', 'NYM', 'PHI', 'PIT', 'STL']
+            elif (year > 1993) & (year < 2005):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI']
+            elif (year > 2004) & (year < 2012):
+                division = ['ATL', 'FLA', 'NYM', 'PHI', 'WSN']
+            elif (year > 2011):
+                division = ['ATL', 'MIA', 'NYM', 'PHI', 'WSN']
+        elif self.division == "AL":
+            if (year < 1902):
+                division = ['BAL', 'BOS', 'CHW', 'CLE', 'DET', 'MIL', 'PHA', 'WAS']
+            elif (year > 1901) & (year < 1903):
+                division = ['BAL', 'BOS', 'CHW', 'CLE', 'DET', 'PHA', 'SLB', 'WAS'] 
+            elif (year > 1902) & (year < 1913):
+                division = ['BOS', 'CHW', 'CLE', 'DET', 'NYH', 'PHA', 'SLB', 'WAS']
+            elif (year > 1912) & (year < 1954):
+                division = ['BOS', 'CHW', 'CLE', 'DET', 'NYY', 'PHA', 'SLB', 'WAS']
+            elif (year > 1953) & (year < 1955):
+                division = ['BAL', 'BOS', 'CHW', 'CLE', 'DET', 'NYY', 'PHA', 'WAS']
+            elif (year > 1954) & (year < 1961):
+                division = ['BAL', 'BOS', 'CHW', 'CLE', 'DET', 'KCA', 'NYY', 'WAS']
+            elif (year > 1960) & (year < 1965):
+                division = ['BAL', 'BOS', 'CHW', 'CLE', 'DET', 'KCA', 'LAA', 'MIN', 'NYY', 'WAS']
+            elif (year > 1964) & (year < 1968):
+                division = ['BAL', 'BOS', 'CAL', 'CHW', 'CLE', 'DET', 'KCA', 'MIN', 'NYY', 'WAS'] 
+            elif (year > 1967) & (year < 1969):
+                division = ['BAL', 'BOS', 'CAL', 'CHW', 'CLE', 'DET', 'MIN', 'NYY', 'OAK', 'WAS']
+            elif (year > 1968) & (year < 1970):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CHW', 'KCR', 'MIN', 'OAK', 'SEA']
+            elif (year > 1969) & (year < 1972):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'NYY', 'WAS', 'CAL', 'CHW', 'KCR', 'MIN', 'MIL', 'OAK']
+            elif (year > 1971) & (year < 1977):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'CAL', 'CHW', 'KCR', 'MIN', 'OAK', 'TEX']
+            elif (year > 1976) & (year < 1997):
+                division = ['BAL', 'BOS', 'CLE', 'DET', 'MIL', 'NYY', 'TOR', 'CAL', 'CHW', 'KCR', 'MIN', 'OAK', 'SEA', 'TEX']
+            elif (year > 1996) & (year < 1998):
+                division = ['BAL', 'BOS', 'DET', 'NYY', 'TOR', 'CHW', 'CLE', 'KCR', 'MIL', 'MIN', 'ANA', 'OAK', 'SEA', 'TEX']
+            elif (year > 1997) & (year < 2005):
+                division = ['BAL', 'BOS', 'NYY', 'TBD', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'ANA', 'OAK', 'SEA', 'TEX']
+            elif (year > 2004) & (year < 2008):
+                division = ['BAL', 'BOS', 'NYY', 'TBD', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'LAA', 'OAK', 'SEA', 'TEX']
+            elif (year > 2007) & (year < 2013):
+                division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'LAA', 'OAK', 'SEA', 'TEX']
+            elif (year > 2012):
+                division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX']
+        elif self.division == "NL":
+            if year < 1903:
+                division = ['BSN', 'BRO', 'CHI', 'CIN', 'NYG', 'PHI', 'PIT', 'STL']
+            if (year > 1902) & (year < 1953):
+                division = ['BSN', 'BRO', 'CHC', 'CIN', 'NYG', 'PHI', 'PIT', 'STL']
+            if (year > 1952) & (year < 1958):
+                division = ['BRO', 'CHC', 'CIN', 'MIL', 'NYG', 'PHI', 'PIT', 'STL']
+            if (year > 1957) & (year < 1962):
+                division = ['CHC', 'CIN', 'LAD', 'MIL', 'PHI', 'PIT', 'STL', 'SFG']
+            if (year > 1961) & (year < 1966):
+                division = ['CHC', 'CIN', 'HOU', 'LAD', 'MIL', 'PHI', 'NYM', 'PIT', 'STL', 'SFG']
+            if (year > 1965) & (year < 1969):
+                division = ['ATL', 'CHC', 'CIN', 'HOU', 'LAD', 'PHI', 'NYM', 'PIT', 'STL', 'SFG']
+            if (year > 1968) & (year < 1993):
+                division = ['CHC', 'MON', 'NYM', 'PHI', 'PIT', 'STL', 'ATL', 'CIN', 'HOU', 'LAD', 'SDP', 'SFG']
+            if (year > 1992) & (year < 1994):
+                division = ['CHC', 'FLA', 'MON', 'NYM', 'PHI', 'PIT', 'STL', 'ATL', 'CIN', 'COL', 'HOU', 'LAD', 'SDP', 'SFG']
+            if (year > 1993) & (year < 1998):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI', 'CHC', 'CIN', 'HOU', 'PIT', 'STL', 'COL', 'LAD', 'SDP', 'SFG']
+            if (year > 1997) & (year < 2005):
+                division = ['ATL', 'FLA', 'MON', 'NYM', 'PHI', 'CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
+            if (year > 2004) & (year < 2012):
+                division = ['ATL', 'FLA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
+            if (year > 2011) & (year < 2013):
+                division = ['ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
+            if (year > 2012):
+                division = ['ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
         else:
-            self.loop3.set(True)
-            self.loop2.set(True)
-            self.loop1.set(True)
-            positions.clear()
-            positions.append(objects[4].get())
+            division = []
 
-    def select_player(self, player, pos, val):
+        return(division)
+
+    def verify_position(self, positions, pos, objects):
+        print('Verify Positions Called')
+
+        self.loop3.set(True)
+        self.loop2.set(True)
+        self.loop1.set(True)
+        positions.clear()
+        positions.append(pos)
+
+    def select_player(self, player, pos, val, division):
         position = pos[0]
         
         if position == 'C':
@@ -753,8 +896,9 @@ class Game:
             else:
                 player.player_objects[8].config(text = f'DH: {player.temp_name} [{val}]')
 
+        self.prev_player = player.temp_name
+        self.prev_division = division
         player.rem_turns -= 1
-        self.picked_players.append(player.temp_name)
 
         if self.stat == 'AVG':
             player.ab += player.temp_ab
@@ -765,14 +909,14 @@ class Game:
             player.total += val
             player.player_objects[9].config(text = f'Total: {round(player.total, 1)}')
 
-        if len(self.division_adj) == 5:
+        if self.division_tf:
             if player.temp_team in player.teams_needed: 
                 player.teams_needed.remove(player.temp_team)
             player.player_objects[11].config(text = f'{", ".join(player.teams_needed)}')
 
         self.loop2.set(True)
 
-    def select_pitcher(self, player, pos, val):
+    def select_pitcher(self, player, pos, val, division):
         if pos[0] == 'SP':
             if player.num_sp == 0:
                 player.sp1.name = player.temp_name
@@ -841,8 +985,9 @@ class Game:
                 if self.stat == 'ERA': player.player_objects[8].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
                 else: player.player_objects[8].config(text = f'RP: {player.temp_name} [{val}]')
 
+        self.prev_player = player.temp_name
+        self.prev_division = division
         player.rem_turns -= 1
-        self.picked_players.append(player.temp_name)
 
         if pos[0] == 'SP':
             player.num_sp += 1
