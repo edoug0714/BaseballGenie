@@ -1,25 +1,22 @@
-from tkinter import *
 from tkinter import ttk
+from tkinter import *
 import sv_ttk
 import helper
 
 CURR_YEAR = 2024
 
-def set_num_players(value, numPlayers, button, prevButton, success):
+def set_num_players(value, numPlayers, success):
     success.set("1")
     numPlayers.set(value)
-    prevButton[0] = button
 
-def set_division(value, division, button, prevButton):
+def set_division(value, division):
     division.set(value)
-    prevButton[0] = button
 
-def set_stat(value, stat, button, prevButton, success):
+def set_stat(value, stat, success):
     success.set("1")
     stat.set(value)
-    prevButton[0] = button
 
-def set_years(start_year, end_year, year1_entry, year2_entry, root, success1, success2, error_label, division):
+def set_years(start_year, end_year, year1_entry, year2_entry, success1, success2, error_label, division, hold):
     #Check for num_players entry
     if success1.get() != "1":
         helper.throw_error(error_label, message = "Error: Please select number of players.")
@@ -63,115 +60,197 @@ def set_years(start_year, end_year, year1_entry, year2_entry, root, success1, su
     else:
         if start_year.get() < 1901:
             start_year.set(1901)
-    if end_year.get() > 2024:
-        end_year.set(2024)
+    if end_year.get() > CURR_YEAR:
+        end_year.set(CURR_YEAR)
 
-    helper.quit(root)
+    hold.set(True)
 
-def gameSetup():
+def gameSetup(root):
     list = []
-    root = Tk()
-    sv_ttk.set_theme('dark')
-    root.geometry("700x600")
-    root.protocol("WM_DELETE_WINDOW", lambda: helper.on_close(list, root))
+    objects = []
+    hold = BooleanVar(root)
+    textcolor = StringVar(root)
+    backgroundcolor = StringVar(root)
+    errorcolor = StringVar(root)
+    textcolor.set('#39957b')
+    backgroundcolor.set("#1c1c1c")
+    errorcolor.set('yellow')
+    root.geometry("700x900")
+    root.protocol("WM_DELETE_WINDOW", lambda: (helper.on_close(list, root), hold.set(True)))
+
+    root.grid_columnconfigure(0, weight=1)  # Center the column
 
     #Display grid for player selection
     success1 = StringVar()
     numPlayers = IntVar()
-    prevButton_numPlayers = [None]
-    num_players_label = Label(root, text = "Select Number of Players:", font=('System', 18), fg = '#39957b')
-    num_players_label.pack(pady = 10)
-    num_players_frame = ttk.Frame(root)
-    num_players_frame.pack()
-    button2 = ttk.Button(num_players_frame, text = "2", command = lambda: set_num_players(2, numPlayers, button2, prevButton_numPlayers, success1))
-    button2.grid(row = 0, column = 0, padx = 5, pady = 5)
-    button3 = ttk.Button(num_players_frame, text = "3", command = lambda: set_num_players(3, numPlayers, button3, prevButton_numPlayers, success1))
-    button3.grid(row = 0, column = 1, padx = 5, pady = 5)
-    button4 = ttk.Button(num_players_frame, text = "4", command = lambda: set_num_players(4, numPlayers, button4, prevButton_numPlayers, success1))
-    button4.grid(row = 0, column = 2, padx = 5, pady = 5)
+    objects.append(Label(root, text = "Select Number of Players:", font=('System', 18), fg = '#39957b'))
+    objects[-1].pack(pady = 10)
+    objects.append(ttk.Frame(root))
+    objects[-1].pack() #OBJECTS[1]
+    objects.append(ttk.Button(objects[1], text = "2", command = lambda: set_num_players(2, numPlayers, success1)))
+    objects[-1].grid(row = 0, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[1], text = "3", command = lambda: set_num_players(3, numPlayers, success1)))
+    objects[-1].grid(row = 0, column = 1, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[1], text = "4", command = lambda: set_num_players(4, numPlayers, success1)))
+    objects[-1].grid(row = 0, column = 2, padx = 5, pady = 5)
 
     #Display button grid for division selection
     division = StringVar()
     division.set("MLB")
-    prevButton_division = [None]
-    division_label = Label(root, text = "Select Division (leave blank for entire MLB):", font=('System', 18), fg = '#39957b')
-    division_label.pack(pady = 10)
-    division_frame = ttk.Frame(root)
-    division_frame.pack()
-    button_al = ttk.Button(division_frame, text = "AL", command = lambda: set_division("AL", division, button_al, prevButton_division))
-    button_al.grid(row = 0, column = 0, padx = 5, pady = 5)
-    button_alw = ttk.Button(division_frame, text = "AL West", command = lambda: set_division("ALW", division, button_alw, prevButton_division))
-    button_alw.grid(row = 0, column = 1, padx = 5, pady = 5)
-    button_alc = ttk.Button(division_frame, text = "AL Central", command = lambda: set_division("ALC", division, button_alc, prevButton_division))
-    button_alc.grid(row = 0, column = 2, padx = 5, pady = 5)
-    button_ale = ttk.Button(division_frame, text = "AL East", command = lambda: set_division("ALE", division, button_ale, prevButton_division))
-    button_ale.grid(row = 0, column = 3, padx = 5, pady = 5)
-    button_nl = ttk.Button(division_frame, text = "NL", command = lambda: set_division("NL", division, button_nl, prevButton_division))
-    button_nl.grid(row = 1, column = 0, padx = 5, pady = 5)
-    button_nlw = ttk.Button(division_frame, text = "NL West", command = lambda: set_division("NLW", division, button_nlw, prevButton_division))
-    button_nlw.grid(row = 1, column = 1, padx = 5, pady = 5)
-    button_nlc = ttk.Button(division_frame, text = "NL Central", command = lambda: set_division("NLC", division, button_nlc, prevButton_division))
-    button_nlc.grid(row = 1, column = 2, padx = 5, pady = 5)
-    button_nle = ttk.Button(division_frame, text = "NL East", command = lambda: set_division("NLE", division, button_nle, prevButton_division))
-    button_nle.grid(row = 1, column = 3, padx = 5, pady = 5)
+    objects.append(Label(root, text = "Select Division (leave blank for entire MLB):", font=('System', 18), fg = textcolor.get()))
+    objects[-1].pack(pady = 10)
+    objects.append(ttk.Frame(root)) #OBJECTS[6]
+    objects[-1].pack()
+    objects.append(ttk.Button(objects[6], text = "AL", command = lambda: set_division("AL", division)))
+    objects[-1].grid(row = 0, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "AL West", command = lambda: set_division("ALW", division)))
+    objects[-1].grid(row = 0, column = 1, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "AL Central", command = lambda: set_division("ALC", division)))
+    objects[-1].grid(row = 0, column = 2, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "AL East", command = lambda: set_division("ALE", division)))
+    objects[-1].grid(row = 0, column = 3, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "NL", command = lambda: set_division("NL", division)))
+    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "NL West", command = lambda: set_division("NLW", division)))
+    objects[-1].grid(row = 1, column = 1, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "NL Central", command = lambda: set_division("NLC", division)))
+    objects[-1].grid(row = 1, column = 2, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[6], text = "NL East", command = lambda: set_division("NLE", division)))
+    objects[-1].grid(row = 1, column = 3, padx = 5, pady = 5)
 
     #Display button grid for stat selection
     success2 = StringVar()
     stat = StringVar()
-    prevButton_stat = [None]
-    stat_label = Label(root, text = "Select Stat for Draft:", font=('System', 18), fg = '#39957b')
-    stat_label.pack(pady = 10)
-    stat_frame = ttk.Frame(root)
-    stat_frame.pack()
-    button_war = ttk.Button(stat_frame, text = "Batter WAR", command = lambda: set_stat("WAR", stat, button_war, prevButton_stat, success2))
-    button_war.grid(row = 0, column = 0, padx = 5, pady = 5, sticky = "ew")
-    button_hits = ttk.Button(stat_frame, text = "Hits", command = lambda: set_stat("H", stat, button_hits, prevButton_stat, success2))
-    button_hits.grid(row = 0, column = 1, padx = 5, pady = 5, sticky = "ew")
-    button_hr = ttk.Button(stat_frame, text = "Home Runs", command = lambda: set_stat("HR", stat, button_hr, prevButton_stat, success2))
-    button_hr.grid(row = 0, column = 2, padx = 5, pady = 5, sticky = "ew")
-    button_sb = ttk.Button(stat_frame, text = "Stolen Bases", command = lambda: set_stat("SB", stat, button_sb, prevButton_stat, success2))
-    button_sb.grid(row = 1, column = 0, padx = 5, pady = 5, sticky = "ew")
-    button_avg = ttk.Button(stat_frame, text = "Batting Avg", command = lambda: set_stat("AVG", stat, button_avg, prevButton_stat, success2))
-    button_avg.grid(row = 1, column = 1, padx = 5, pady = 5, sticky = "ew")
-    button_pwar = ttk.Button(stat_frame, text = "Pitcher WAR", command = lambda: set_stat("PWAR", stat, button_pwar, prevButton_stat, success2))
-    button_pwar.grid(row = 1, column = 2, padx = 5, pady = 5, sticky = "ew")
-    button_wins = ttk.Button(stat_frame, text = "Wins", command = lambda: set_stat("W", stat, button_wins, prevButton_stat, success2))
-    button_wins.grid(row = 2, column = 0, padx = 5, pady = 5, sticky = "ew")
-    button_era = ttk.Button(stat_frame, text = "ERA", command = lambda: set_stat("ERA", stat, button_era, prevButton_stat, success2))
-    button_era.grid(row = 2, column = 1, padx = 5, pady = 5, sticky = "ew")
-    button_so = ttk.Button(stat_frame, text = "Strikeouts", command = lambda: set_stat("SO", stat, button_so, prevButton_stat, success2))
-    button_so.grid(row = 2, column = 2, padx = 5, pady = 5, sticky = "ew")
+    objects.append(Label(root, text = "Select Stat for Draft:", font=('System', 18), fg = '#39957b'))
+    objects[-1].pack(pady = 10)
+    objects.append(ttk.Frame(root)) #OBJECTS[16]
+    objects[-1].pack()
+    objects.append(ttk.Button(objects[16], text = "Batter WAR", command = lambda: set_stat("WAR", stat, success2)))
+    objects[-1].grid(row = 0, column = 0, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Hits", command = lambda: set_stat("H", stat, success2)))
+    objects[-1].grid(row = 0, column = 1, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Home Runs", command = lambda: set_stat("HR", stat, success2)))
+    objects[-1].grid(row = 0, column = 2, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Stolen Bases", command = lambda: set_stat("SB", stat, success2)))
+    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Batting Avg", command = lambda: set_stat("AVG", stat, success2)))
+    objects[-1].grid(row = 1, column = 1, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Pitcher WAR", command = lambda: set_stat("PWAR", stat, success2)))
+    objects[-1].grid(row = 1, column = 2, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Wins", command = lambda: set_stat("W", stat, success2)))
+    objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "ERA", command = lambda: set_stat("ERA", stat, success2)))
+    objects[-1].grid(row = 2, column = 1, padx = 5, pady = 5, sticky = "ew")
+    objects.append(ttk.Button(objects[16], text = "Strikeouts", command = lambda: set_stat("SO", stat, success2)))
+    objects[-1].grid(row = 2, column = 2, padx = 5, pady = 5, sticky = "ew")
 
     #Display text boxes for year selection
     start_year = IntVar()
     end_year = IntVar()
-    year_frame = Frame(root)
-    year_frame.pack(pady = 10)
-    year1_label = Label(year_frame, text = "Start Year", font=('System', 15), fg = '#39957b')
-    year1_label.grid(row = 0, column = 0, padx = 5, pady = 5)
-    year1_entry = ttk.Entry(year_frame, width = 10)
-    year1_entry.grid(row = 1, column = 0, padx = 5, pady = 5)
-    year2_label = Label(year_frame, text = "End Year", font=('System', 15), fg = '#39957b')
-    year2_label.grid(row = 0, column = 1, padx = 5, pady = 5)
-    year2_entry = ttk.Entry(year_frame, width = 10)
-    year2_entry.grid(row = 1, column = 1, padx = 5, pady = 5)
+    objects.append(Frame(root)) #OBJECTS[26]
+    objects[-1].pack(pady = 10)
+    objects.append(Label(objects[26], text = "Start Year", font=('System', 15), fg = '#39957b'))
+    objects[-1].grid(row = 0, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Entry(objects[26], width = 10))
+    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
+    objects.append(Label(objects[26], text = "End Year", font=('System', 15), fg = '#39957b'))
+    objects[-1].grid(row = 0, column = 1, padx = 5, pady = 5)
+    objects.append(ttk.Entry(objects[26], width = 10))
+    objects[-1].grid(row = 1, column = 1, padx = 5, pady = 5)
+
+    #Display switch for team scarcity
+    teamscar = BooleanVar(root)
+    teamscar.set(True)
+    objects.append(Label(root, text = "Team Scarcity", font=('System', 12), fg = '#39957b'))
+    objects[-1].pack(pady = 5)
+    objects.append(Frame(root)) #OBJECTS[32]
+    objects[-1].pack(pady = 5)
+    objects.append(ttk.Button(objects[32], text = "Toggle On", command = lambda: changeteamscarcity(objects, "On", teamscar))) #OBJECTS[33]
+    objects.append(ttk.Button(objects[32], text = "Toggle Off", command = lambda: changeteamscarcity(objects, "Off", teamscar))) #OBJECTS[34]
+    objects[-1].grid(row = 0, column = 0, pady = 5)
+
+    #Display buttons for themes
+    objects.append(Label(root, text = "Theme", font=('System', 12), fg = '#39957b'))
+    objects[-1].pack(pady = 5)
+    objects.append(Frame(root)) #OBJECTS[36]
+    objects[-1].pack(pady = 5)
+    objects.append(ttk.Button(objects[36], text = "Light", command = lambda: (sv_ttk.set_theme('light'), backgroundcolor.set("#fafafa"), changeerrorcolor(objects, 'red', errorcolor))))
+    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Button(objects[36], text = "Dark", command = lambda: (sv_ttk.set_theme('dark'), backgroundcolor.set("#0078d7"), changeerrorcolor(objects, 'yellow', errorcolor))))
+    objects[-1].grid(row = 1, column = 1, padx = 5, pady = 5)
+
+    #Display buttons for text color
+    objects.append(Label(root, text = "Text Color", font=('System', 12), fg = '#39957b'))
+    objects[-1].pack(pady = 5)
+    objects.append(Frame(root)) #OBJECTS[40]
+    objects[-1].pack(pady = 5)
+    objects.append(ttk.Button(objects[40], text = "Ocean", command = lambda: changetextcolor(objects, '#39957b', textcolor)))
+    objects[-1].grid(row = 0, column = 0, padx = 5, pady = 5, sticky = 'ew')
+    objects.append(ttk.Button(objects[40], text = "Rose", command = lambda: changetextcolor(objects, '#e81747', textcolor)))
+    objects[-1].grid(row = 0, column = 1, padx = 5, pady = 5, sticky = 'ew')
+    objects.append(ttk.Button(objects[40], text = "Spooky", command = lambda: changetextcolor(objects, '#fc8f03', textcolor)))
+    objects[-1].grid(row = 0, column = 2, padx = 5, pady = 5, sticky = 'ew')
+    objects.append(ttk.Button(objects[40], text = "Lime", command = lambda: changetextcolor(objects, '#aee916', textcolor)))
+    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5, sticky = 'ew')
+    objects.append(ttk.Button(objects[40], text = "Tulip", command = lambda: changetextcolor(objects, '#9415ea', textcolor)))
+    objects[-1].grid(row = 1, column = 1, padx = 5, pady = 5, sticky = 'ew')
+    objects.append(ttk.Button(objects[40], text = "Ruby", command = lambda: changetextcolor(objects, '#cd3f32', textcolor)))
+    objects[-1].grid(row = 1, column = 2, padx = 5, pady = 5, sticky = 'ew')
 
     #Display confirm button
-    success = False
-    confirm_frame = Frame(root)
-    confirm_frame.pack(pady = 5)
-    error_frame = Frame(root)
-    error_frame.pack(pady = 2)
-    error_label = Label(error_frame, text = "", fg = 'yellow')
-    confirm_button = ttk.Button(confirm_frame, text = "Confirm Settings", command = lambda: set_years(start_year, end_year, year1_entry, year2_entry, root, success1, success2, error_label, division))
-    confirm_button.pack(pady = 5)
+    objects.append(Frame(root)) #OBJECTS[47]
+    objects[-1].pack(pady = 5)
+    objects.append(Frame(root))
+    objects[-1].pack(pady = 2)
+    objects.append(Label(objects[48], text = "", fg = 'yellow'))
+    objects.append(ttk.Button(objects[47], text = "Confirm Settings", command = lambda: set_years(start_year, end_year, objects[28], objects[30], success1, success2, objects[49], division, hold)))
+    objects[-1].pack(pady = 5)
 
-    root.mainloop()
+
+    root.wait_variable(hold)
 
     list.append(numPlayers.get())
     list.append(division.get())
     list.append(stat.get())
     list.append(start_year.get())
     list.append(end_year.get())
+    list.append(textcolor.get())
+    list.append(backgroundcolor.get())
+    list.append(errorcolor.get())
+    list.append(teamscar.get())
+
+    if list[0] != -1:
+        for obj in objects:
+            obj.destroy()
+        objects.clear()
 
     return list
+
+def changetextcolor(objects, color, textcolor):
+    objects[0].config(fg = color)
+    objects[5].config(fg = color)
+    objects[15].config(fg = color)
+    objects[27].config(fg = color)
+    objects[29].config(fg = color)
+    objects[31].config(fg = color)
+    objects[35].config(fg = color)
+    objects[39].config(fg = color)
+    textcolor.set(color)
+
+def changeerrorcolor(objects, color, errorcolor):
+    objects[45].config(fg = color)
+    errorcolor.set(color)
+
+def changeteamscarcity(objects, state, tf):
+    if state == "Off":
+        objects[34].grid_forget()
+        objects[33].grid(row = 0, column = 0, pady = 5)
+        tf.set(False)
+    else:
+        objects[33].grid_forget
+        objects[34].grid(row = 0, column = 0, pady = 5)
+        tf.set(True)
+
+
+    
+

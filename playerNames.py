@@ -1,22 +1,74 @@
-from tkinter import *
 from tkinter import ttk
+from tkinter import *
 import sv_ttk
 import helper
 
-def test_input(numPlayers, division, stat, startYear, endYear, root):
-    test_frame = Frame(root)
-    test_frame.pack(pady = 10)
-    numPlayers_label = Label(test_frame, text = f'Num Players: {numPlayers}')
-    numPlayers_label.grid(row = 0, column = 0, padx = 5, pady = 5)
-    division_label = Label(test_frame, text = f'Division: {division}')
-    division_label.grid(row = 1, column = 0, padx = 5, pady = 5)
-    stat_label = Label(test_frame, text = f'Stat: {stat}')
-    stat_label.grid(row = 2, column = 0, padx = 5, pady = 5)
-    year_label = Label(test_frame, text = f'Years: ({startYear}, {endYear})')
-    year_label.grid(row = 3, column = 0, padx = 5, pady = 5)
+def playerNames(root, inputs):
+    numPlayers = inputs[0]
+    textcolor = inputs[5]
+    errorcolor = inputs[7]
+    names = []
+    objects = []
+    hold = BooleanVar(root)
 
-def confirm_player_names(numPlayers, names, root, error_label, player1_entry, player2_entry, player3_entry = 0, player4_entry = 0):
+    if numPlayers == 2:
+        root.geometry("500x300")
+    elif numPlayers == 3:
+        root.geometry("500x385")
+    elif numPlayers == 4:
+        root.geometry("500x470")
+    root.protocol("WM_DELETE_WINDOW", lambda: (helper.on_close(names, root), hold.set(True)))
+
+    objects.append(ttk.Frame(root))
+    objects[-1].pack(pady = 10)
+    objects.append(Label(objects[0], text = "Player 1 Name", font=('System', 18), fg = textcolor))
+    objects[-1].grid(row = 0, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Entry(objects[0]))
+    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
+    objects.append(Label(objects[0], text = "Player 2 Name", font=('System', 18), fg = textcolor))
+    objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
+    objects.append(ttk.Entry(objects[0])) #OBJECTS[4]
+    objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
+    if numPlayers > 2:
+        objects.append(Label(objects[0], text = "Player 3 Name", font=('System', 18), fg = textcolor))
+        objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+        objects.append(ttk.Entry(objects[0]))
+        objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
+        if numPlayers > 3:
+            objects.append(Label(objects[0], text = "Player 4 Name", font=('System', 18), fg = textcolor))
+            objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+            objects.append(ttk.Entry(objects[0]))
+            objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
+
+    objects.append(ttk.Frame(root)) #OBJECTS[9]
+    objects[-1].pack(pady = 5)
+
+    objects.append(ttk.Frame(root))
+    objects[-1].pack(pady = 2)
+
+    if numPlayers == 2:
+        objects.append(Label(objects[6], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[5], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[7], hold, objects[2], objects[4])))
+    elif numPlayers == 3:
+        objects.append(Label(objects[8], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[7], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[9], hold, objects[2], objects[4], objects[6])))
+    else:
+        objects.append(Label(objects[10], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[9], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[11], hold, objects[2], objects[4], objects[6], objects[8])))
+    objects[-1].pack(pady = 5)
+
+    root.wait_variable(hold)
+
+    if names[0] != -1:
+        for obj in objects:
+            obj.destroy()
+        objects.clear()
+
+    return(names)
+
+def confirm_player_names(numPlayers, names, error_label, hold, player1_entry, player2_entry, player3_entry = 0, player4_entry = 0):
     if player1_entry.get() == "":
+        print(error_label)
         helper.throw_error(error_label, message = "Error: Please enter name for player 1")
         return
     if player2_entry.get() == "":
@@ -37,73 +89,5 @@ def confirm_player_names(numPlayers, names, root, error_label, player1_entry, pl
         names.append(player3_entry.get())
         if numPlayers > 3:
             names.append(player4_entry.get())
-
-    helper.quit(root)
-
-def set_player_names(numPlayers, names, root):
-    player_frame = ttk.Frame(root)
-    player_frame.pack(pady = 10)
-
-    player1_label = Label(player_frame, text = "Player 1 Name", font=('System', 18), fg = '#39957b')
-    player1_label.grid(row = 0, column = 0, padx = 5, pady = 5)
-    player1_entry = ttk.Entry(player_frame)
-    player1_entry.grid(row = 1, column = 0, padx = 5, pady = 5)
-
-    player2_label = Label(player_frame, text = "Player 2 Name", font=('System', 18), fg = '#39957b')
-    player2_label.grid(row = 2, column = 0, padx = 5, pady = 5)
-    player2_entry = ttk.Entry(player_frame)
-    player2_entry.grid(row = 3, column = 0, padx = 5, pady = 5)
-
-    if numPlayers > 2:
-        player3_label = Label(player_frame, text = "Player 3 Name", font=('System', 18), fg = '#39957b')
-        player3_label.grid(row = 4, column = 0, padx = 5, pady = 5)
-        player3_entry = ttk.Entry(player_frame)
-        player3_entry.grid(row = 5, column = 0, padx = 5, pady = 5)
-
-        if numPlayers > 3:
-            player4_label = Label(player_frame, text = "Player 4 Name", font=('System', 18), fg = '#39957b')
-            player4_label.grid(row = 6, column = 0, padx = 5, pady = 5)
-            player4_entry = ttk.Entry(player_frame)
-            player4_entry.grid(row = 7, column = 0, padx = 5, pady = 5)
-
-    confirm_frame = ttk.Frame(root)
-    confirm_frame.pack(pady = 5)
-
-    error_frame = ttk.Frame(root)
-    error_frame.pack(pady = 2)
-    error_label = Label(error_frame, text = "", fg = 'yellow')
-
-    if numPlayers == 2:
-        confirm_button = ttk.Button(confirm_frame, text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, root, error_label, player1_entry, player2_entry))
-    elif numPlayers == 3:
-        confirm_button = ttk.Button(confirm_frame, text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, root, error_label, player1_entry, player2_entry, player3_entry))
-    else:
-        confirm_button = ttk.Button(confirm_frame, text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, root, error_label, player1_entry, player2_entry, player3_entry, player4_entry))
-    confirm_button.pack(pady = 5)
-
-    return(names)
-
-def playerNames(inputs):
-    numPlayers = inputs[0]
-    division = inputs[1]
-    stat = inputs[2]
-    startYear = inputs[3]
-    endYear = inputs[4]
-
-    names = []
-    root = Tk()
-    sv_ttk.set_theme('dark')
-    if numPlayers == 2:
-        root.geometry("500x300")
-    elif numPlayers == 3:
-        root.geometry("500x385")
-    elif numPlayers == 4:
-        root.geometry("500x470")
-    root.protocol("WM_DELETE_WINDOW", lambda: helper.on_close(names, root))
-
-    #test_input(numPlayers, division, stat, startYear, endYear, root2)
-    set_player_names(numPlayers, names, root)
-
-    root.mainloop()
-
-    return(names)
+    
+    hold.set(True)
