@@ -1,0 +1,4 @@
+tkinter
+sv_ttk
+numpy
+pandas
