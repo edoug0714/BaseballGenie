@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import helper
 
+CURR_YEAR = 2024
+
 class Pick:
     def __init__(self, name, position, total):
         self.name = name
@@ -64,13 +66,13 @@ class Game:
         self.teamscar = inputs[8]
 
         if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
-            self.data = pd.read_csv("data/merged_batter_data.csv").fillna(0)
+            self.data = pd.read_csv("../data/merged_batter_data.csv").fillna(0)
             self.data.drop(columns=self.data.columns[0], axis=1, inplace=True)
-            self.season_name = pd.read_csv("data/season_name_batters.csv").fillna(0)
+            self.season_name = pd.read_csv("../data/season_name_batters.csv").fillna(0)
             self.season_name = self.season_name['x'].tolist()
         else:
-            self.data = pd.read_csv("data/merged_pitcher_data.csv").fillna(0)
-            self.season_name = pd.read_csv("data/season_name_pitchers.csv").fillna(0)
+            self.data = pd.read_csv("../data/merged_pitcher_data.csv").fillna(0)
+            self.season_name = pd.read_csv("../data/season_name_pitchers.csv").fillna(0)
             self.season_name = self.season_name['x'].tolist()
 
         self.create_players(names)
@@ -79,15 +81,15 @@ class Game:
 
     def create_players(self, names):
         self.player1 = Player(names[0])
-        self.player1.teams_needed = self.set_division(2024, self.division)
+        self.player1.teams_needed = self.set_division(CURR_YEAR, self.division)
         self.player2 = Player(names[1])
-        self.player2.teams_needed = self.set_division(2024, self.division)
+        self.player2.teams_needed = self.set_division(CURR_YEAR, self.division)
         if self.numPlayers > 2:
             self.player3 = Player(names[2])
-            self.player3.teams_needed = self.set_division(2024, self.division)
+            self.player3.teams_needed = self.set_division(CURR_YEAR, self.division)
             if self.numPlayers > 3:
                 self.player4 = Player(names[3])
-                self.player4.teams_needed = self.set_division(2024, self.division)
+                self.player4.teams_needed = self.set_division(CURR_YEAR, self.division)
 
     def set_division_tf(self):
         if self.division in ['MLB', 'AL', 'NL']:
@@ -97,11 +99,11 @@ class Game:
 
     def startGame(self):
         if self.numPlayers == 2:
-            self.root.geometry("1200x550")
+            self.root.geometry("1200x620")
         elif self.numPlayers == 3:
-            self.root.geometry("1500x550")
+            self.root.geometry("1500x620")
         else:
-            self.root.geometry("1800x550")
+            self.root.geometry("1800x620")
         #sv_ttk.set_theme('dark')
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close)
 
@@ -341,6 +343,11 @@ class Game:
         self.loop1.set(False)
         self.loop2.set(False)
         self.loop3.set(False)
+
+        #Filter season_name list so that only correct years show up in listbox
+        self.season_name = [item for item in self.season_name if str(self.start_year) < item < str(self.end_year + 1)]
+
+        self.errorcode = -1
         while self.loop1.get() == False:
             print('While loop 1 called')
             self.loop1.set(False)
@@ -367,6 +374,18 @@ class Game:
             self.prev_player_stats(center_frame, objects)
             self.remaining_teams(center_frame, objects)
 
+            if self.errorcode == 0:
+                helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = 12)
+            elif self.errorcode == 1:
+                helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = 12)
+            elif self.errorcode == 2:
+                helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}.', row = 12)
+            elif self.errorcode == 3:
+                helper.throw_error(objects[-1], message = f'Error: {", ".join(franchises)} are not available.', row = 12)
+            elif self.errorcode == 4:
+                helper.throw_error(objects[-1], message = f'Error: Year is out of range.', row = 12)
+            self.errorcode = -1
+
             #Wait variable that holds screen until player is selected
             center_frame.wait_variable(self.loop1)
 
@@ -381,29 +400,54 @@ class Game:
                 teams = season_stats['Team'].unique()
                 franchises = season_stats['Franchise'].unique()
                 common_teams_div = np.intersect1d(teams, division)
-                common_teams_fra = np.intersect1d(franchises, self.remteams)
+                if self.teamscar:
+                    common_teams_fra = np.intersect1d(franchises, self.remteams)
+                else:
+                    common_teams_fra = []
                 common_teams_need = np.intersect1d(teams, player.teams_needed)
 
-                if len(player_stats) == 0:
-                    helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = 11)
-                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    objects[6].destroy()
-                    objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                skiploop2 = False
+                if (player.temp_year < self.start_year) or (player.temp_year > self.end_year):
+                    self.errorcode = 4
+                    skiploop2 = True
+                    self.loop2.set(True)
+                    self.loop1.set(False)
+                elif len(player_stats) == 0:
+                    #helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = 12)
+                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    #objects[6].destroy()
+                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    self.errorcode = 0
+                    skiploop2 = True
+                    self.loop2.set(True)
+                    self.loop1.set(False)
                 elif (len(common_teams_div) == 0) & (not self.teamscar):
-                    helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = 11)
-                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    objects[6].destroy()
-                    objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    #helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = 12)
+                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    #objects[6].destroy()
+                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    self.errorcode = 1
+                    skiploop2 = True
+                    self.loop2.set(True)
+                    self.loop1.set(False)
                 elif (len(common_teams_need) == 0) & (player.rem_turns == len(player.teams_needed)) & (not self.teamscar):
-                    helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}.', row = 11)
-                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    objects[6].destroy()
-                    objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    #helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}.', row = 12)
+                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    #objects[6].destroy()
+                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    self.errorcode = 2
+                    skiploop2 = True
+                    self.loop2.set(True)
+                    self.loop1.set(False)
                 elif (len(common_teams_fra) == 0) & (self.teamscar):
-                    helper.throw_error(objects[-1], message = f'Error: {", ".join(franchises)} are not available.', row = 11)
-                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    objects[6].destroy()
-                    objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    #helper.throw_error(objects[-1], message = f'Error: {", ".join(franchises)} are not available.', row = 12)
+                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    #objects[6].destroy()
+                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
+                    self.errorcode = 3
+                    skiploop2 = True
+                    self.loop2.set(True)
+                    self.loop1.set(False)
                 else:
 
                 #Batting stats
@@ -417,6 +461,7 @@ class Game:
                         else:
                             season_stats = season_stats.sort_values(by = [self.stat], ascending = False)
                             val = season_stats[self.stat].iloc[0]
+                        player.temp_franchise = season_stats['Franchise'].iloc[0]
                         player.temp_team = season_stats['Team'].iloc[0]
                         player.temp_ab = season_stats['AB'].iloc[0]
                         season_stats = season_stats[season_stats['G_by_pos'] / season_stats['G'] >= 0.2]
@@ -606,7 +651,8 @@ class Game:
                     objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
 
                 #Holds program until selection is confirmed
-                center_frame.wait_variable(self.loop2)
+                if not skiploop2:
+                    center_frame.wait_variable(self.loop2)
 
             for obj in objects:
                 obj.destroy()
@@ -868,7 +914,7 @@ class Game:
                 player.teams_needed.remove(player.temp_team)
             player.player_objects[11].config(text = f'{", ".join(player.teams_needed)}')
         elif self.teamscar:
-            indices = [i for i, val in enumerate(self.remteams) if val == player.temp_team]
+            indices = [i for i, val in enumerate(self.remteams) if val == player.temp_franchise]
             if len(indices) > 1:
                 self.remteams.pop(indices[1])
             else:
@@ -1033,11 +1079,24 @@ class Game:
             rem_teams_set = sorted(set(self.remteams))
             objects.append(ttk.Label(center_frame, text = f'Remaining Teams:'))
             objects[-1].grid(row = 9, column = 0, padx = 5, pady = (30, 10))
-            objects.append(ttk.Label(center_frame, text = f'{", ".join(rem_teams_set)}'))
-            objects[-1].grid(row = 10, column = 0, padx = 5, pady = 10)
-            objects.append(Label(center_frame, text = "", fg = self.errorcolor))
-            objects[-1].grid(row = 11, column = 0, padx = 5, pady = 5)
+
+            if len(rem_teams_set) > 15:
+                midpoint = (len(rem_teams_set) + 1) // 2
+                first_half = rem_teams_set[:midpoint]
+                second_half = rem_teams_set[midpoint:]
+                objects.append(ttk.Label(center_frame, text = f'{", ".join(first_half)}'))
+                objects[-1].grid(row = 10, column = 0, padx = 5, pady = 5)
+                objects.append(ttk.Label(center_frame, text = f'{", ".join(second_half)}'))
+                objects[-1].grid(row = 11, column = 0, padx = 5, pady = 5)
+                objects.append(Label(center_frame, text = "", fg = self.errorcolor))
+                #objects[-1].grid(row = 12, column = 0, padx = 5, pady = 5)
+
+            else:
+                objects.append(ttk.Label(center_frame, text = f'{", ".join(rem_teams_set)}'))
+                objects[-1].grid(row = 10, column = 0, padx = 5, pady = 5)
+                objects.append(Label(center_frame, text = "", fg = self.errorcolor))
+                #objects[-1].grid(row = 11, column = 0, padx = 5, pady = 5)
         else:
             objects.append(Label(center_frame, text = "", fg = self.errorcolor))
-            objects[-1].grid(row = 9, column = 0, padx = 5, pady = 5)
+            #objects[-1].grid(row = 9, column = 0, padx = 5, pady = 5)
         
