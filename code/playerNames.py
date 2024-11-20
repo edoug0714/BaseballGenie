@@ -11,11 +11,11 @@ def playerNames(root, inputs):
     hold = BooleanVar(root)
 
     if numPlayers == 2:
-        root.geometry("500x300")
+        root.geometry("500x350")
     elif numPlayers == 3:
-        root.geometry("500x385")
+        root.geometry("500x435")
     elif numPlayers == 4:
-        root.geometry("500x470")
+        root.geometry("500x520")
     root.protocol("WM_DELETE_WINDOW", lambda: (helper.on_close(names, root), hold.set(True)))
 
     objects.append(ttk.Frame(root))
@@ -31,29 +31,35 @@ def playerNames(root, inputs):
     if numPlayers > 2:
         objects.append(Label(objects[0], text = "Player 3 Name", font=('System', 18), fg = textcolor))
         objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
-        objects.append(ttk.Entry(objects[0]))
+        objects.append(ttk.Entry(objects[0])) #Objects[6]
         objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
         if numPlayers > 3:
             objects.append(Label(objects[0], text = "Player 4 Name", font=('System', 18), fg = textcolor))
             objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
-            objects.append(ttk.Entry(objects[0]))
+            objects.append(ttk.Entry(objects[0])) #Objects[8]
             objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
+    
+    tf = BooleanVar(value = True)
+    objects.append(Label(objects[0], text = "Randomize Order", font=('Fixedsys', 12), fg = textcolor))
+    objects.append(ttk.Radiobutton(objects[0], text = 'On', value = True, variable = tf))
+    objects[-1].grid(row = 8, column = 0, pady = 5)
+    objects.append(ttk.Radiobutton(objects[0], text = 'Off', value = False, variable = tf))
+    objects[-1].grid(row = 8, column = 1, pady = 5)
 
-    objects.append(ttk.Frame(root)) #OBJECTS[9]
+    objects.append(ttk.Frame(root)) #OBJECTS[8], [10], [12]
     objects[-1].pack(pady = 5)
-
-    objects.append(ttk.Frame(root))
+    objects.append(ttk.Frame(root)) #OBJECTS[9], [11], [13]
     objects[-1].pack(pady = 2)
 
     if numPlayers == 2:
-        objects.append(Label(objects[6], text = "", fg = errorcolor))
-        objects.append(ttk.Button(objects[5], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[7], hold, objects[2], objects[4])))
+        objects.append(Label(objects[9], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[8], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[10], hold, objects[2], objects[4])))
     elif numPlayers == 3:
-        objects.append(Label(objects[8], text = "", fg = errorcolor))
-        objects.append(ttk.Button(objects[7], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[9], hold, objects[2], objects[4], objects[6])))
+        objects.append(Label(objects[11], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[10], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[12], hold, objects[2], objects[4], objects[6])))
     else:
-        objects.append(Label(objects[10], text = "", fg = errorcolor))
-        objects.append(ttk.Button(objects[9], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[11], hold, objects[2], objects[4], objects[6], objects[8])))
+        objects.append(Label(objects[13], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[12], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[14], hold, objects[2], objects[4], objects[6], objects[8])))
     objects[-1].pack(pady = 5)
 
     root.wait_variable(hold)

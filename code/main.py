@@ -45,9 +45,6 @@ def check_requirements():
         print(f"Error: {requirements_file} not found.")
         sys.exit(1)
 
-# Call the function
-check_requirements()
-
 def check_files():
     curr = os.path.dirname(os.path.abspath(__file__))
     data_folder = os.path.join(curr, '..', 'data')

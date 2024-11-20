@@ -2,6 +2,7 @@ from tkinter import ttk
 from tkinter import *
 import pandas as pd
 import numpy as np
+import random
 import helper
 
 CURR_YEAR = 2024
@@ -80,6 +81,9 @@ class Game:
         self.startGame()
 
     def create_players(self, names):
+        #Randomly assign draft order
+        random.shuffle(names)
+
         self.player1 = Player(names[0])
         self.player1.teams_needed = self.set_division(CURR_YEAR, self.division)
         self.player2 = Player(names[1])
@@ -355,7 +359,7 @@ class Game:
             self.loop3.set(False)
 
             #Create and pack center display objects
-            objects.append(Label(center_frame, text = f'{self.start_year}-{self.end_year} {self.division}', font=('System', 28)))
+            objects.append(Label(center_frame, text = f'{self.start_year}-{self.end_year} {self.division} {self.stat_disp()}', font=('System', 28)))
             objects.append(Label(center_frame, text = f'{player.name}\'s Selection', font=('System', 28), fg = self.textcolor))
             objects.append(Label(center_frame, text = "Select Player", font=('Helvetica', 20)))
             objects.append(Label(center_frame, text = "EX: (1994 Michael Jordan)", font=('Helvetica', 10)))
@@ -413,37 +417,21 @@ class Game:
                     self.loop2.set(True)
                     self.loop1.set(False)
                 elif len(player_stats) == 0:
-                    #helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = 12)
-                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    #objects[6].destroy()
-                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
                     self.errorcode = 0
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
                 elif (len(common_teams_div) == 0) & (not self.teamscar):
-                    #helper.throw_error(objects[-1], message = "Error: Player is not from correct division.", row = 12)
-                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    #objects[6].destroy()
-                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
                     self.errorcode = 1
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
                 elif (len(common_teams_need) == 0) & (player.rem_turns == len(player.teams_needed)) & (not self.teamscar):
-                    #helper.throw_error(objects[-1], message = f'Error: Must select a player from {", ".join(player.teams_needed)}.', row = 12)
-                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    #objects[6].destroy()
-                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
                     self.errorcode = 2
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
                 elif (len(common_teams_fra) == 0) & (self.teamscar):
-                    #helper.throw_error(objects[-1], message = f'Error: {", ".join(franchises)} are not available.', row = 12)
-                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    #objects[6].destroy()
-                    #objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
                     self.errorcode = 3
                     skiploop2 = True
                     self.loop2.set(True)
@@ -557,21 +545,24 @@ class Game:
                                 objects.append(Label(center_frame, text = f'Select position you would like {player.temp_name} at.'))
                                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
 
-                                objects.append(ttk.Button(center_frame, text = adj_pos[0], command = lambda: self.verify_position(adj_pos, adj_pos[0])))
+                                objects.append(ttk.Button(center_frame, text = adj_pos[0], command = lambda: self.select_player(player, [adj_pos[0]], val, division)))
                                 objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
-                                objects.append(ttk.Button(center_frame, text = adj_pos[1], command = lambda: self.verify_position(adj_pos, adj_pos[1])))
+                                objects.append(ttk.Button(center_frame, text = adj_pos[1], command = lambda: self.select_player(player, [adj_pos[1]], val, division)))
                                 objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
                                 if len(adj_pos) > 2:
-                                    objects.append(ttk.Button(center_frame, text = adj_pos[2], command = lambda: self.verify_position(adj_pos, adj_pos[2])))
+                                    objects.append(ttk.Button(center_frame, text = adj_pos[2], command = lambda: self.select_player(player, [adj_pos[2]], val, division)))
                                     objects[-1].grid(row = 6, column = 0, padx = 5, pady = 5)
                                     if len(adj_pos) > 3:
-                                        objects.append(ttk.Button(center_frame, text = adj_pos[3], command = lambda: self.verify_position(adj_pos, adj_pos[3])))
+                                        objects.append(ttk.Button(center_frame, text = adj_pos[3], command = lambda: self.select_player(player, [adj_pos[3]], val, division)))
                                         objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
+
+                                objects.append(ttk.Button(center_frame, text = 'Select New Player', command = lambda: (self.loop3.set(True), self.loop2.set(True), self.loop1.set(False))))
+                                objects[-1].grid(row = 8, column = 0, padx = 5, pady = 25)
 
                                 #Holds program until position is selected
                                 center_frame.wait_variable(self.loop3)
 
-                            self.multiple_positions = True
+                            skiploop2 = True
 
                             for obj in objects:
                                 obj.destroy()
@@ -579,6 +570,7 @@ class Game:
 
                 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+                    #Pitching mode
                     else:
                         season_stats = season_stats[season_stats['Team'].isin(common_teams_div)]
                         if player.rem_turns == len(player.teams_needed):
@@ -642,13 +634,13 @@ class Game:
                             objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
 
                 #If/else statement seperating batters and pitchers rejoins here
-                if self.multiple_positions:
-                    objects.append(ttk.Label(center_frame, text = f'Select {player.temp_name} at {", ".join(adj_pos)}.'))
-                    objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
-                    objects.append(ttk.Button(center_frame, text = f'Confirm', command = lambda: self.select_player(player, adj_pos, val, division)))
-                    objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
-                    objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
+                #if self.multiple_positions:
+                    #objects.append(ttk.Label(center_frame, text = f'Select {player.temp_name} at {", ".join(adj_pos)}.'))
+                    #objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
+                    #objects.append(ttk.Button(center_frame, text = f'Confirm', command = lambda: self.select_player(player, adj_pos, val, division)))
+                    #objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
+                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
+                    #objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
 
                 #Holds program until selection is confirmed
                 if not skiploop2:
@@ -921,6 +913,7 @@ class Game:
                 self.remteams.pop(indices[0])
 
         self.loop2.set(True)
+        self.loop3.set(True)
 
     def select_pitcher(self, player, pos, val, division):
         if pos[0] == 'SP':
@@ -1099,4 +1092,20 @@ class Game:
         else:
             objects.append(Label(center_frame, text = "", fg = self.errorcolor))
             #objects[-1].grid(row = 9, column = 0, padx = 5, pady = 5)
+
+    def stat_disp(self):
+        if self.stat == 'H':
+            return 'Hits'
+        elif self.stat == 'HR':
+            return 'HRs'
+        elif self.stat == 'W':
+            return 'Wins'
+        elif self.stat == 'SO':
+            return 'Ks'
+        elif self.stat == 'SB':
+            return 'SBs'
+        else:
+            return self.stat
+
+
         
