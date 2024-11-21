@@ -11,11 +11,11 @@ def playerNames(root, inputs):
     hold = BooleanVar(root)
 
     if numPlayers == 2:
-        root.geometry("500x350")
+        root.geometry("500x380")
     elif numPlayers == 3:
-        root.geometry("500x435")
+        root.geometry("500x465")
     elif numPlayers == 4:
-        root.geometry("500x520")
+        root.geometry("500x550")
     root.protocol("WM_DELETE_WINDOW", lambda: (helper.on_close(names, root), hold.set(True)))
 
     objects.append(ttk.Frame(root))
@@ -40,26 +40,29 @@ def playerNames(root, inputs):
             objects[-1].grid(row = 7, column = 0, padx = 5, pady = 5)
     
     tf = BooleanVar(value = True)
-    objects.append(Label(objects[0], text = "Randomize Order", font=('Fixedsys', 12), fg = textcolor))
-    objects.append(ttk.Radiobutton(objects[0], text = 'On', value = True, variable = tf))
-    objects[-1].grid(row = 8, column = 0, pady = 5)
-    objects.append(ttk.Radiobutton(objects[0], text = 'Off', value = False, variable = tf))
-    objects[-1].grid(row = 8, column = 1, pady = 5)
+    objects.append(ttk.Frame(root))
+    objects[-1].pack(pady = 10)
+    objects.append(Label(objects[-1], text = "Randomize Order", font=('Fixedsys', 12), fg = textcolor))
+    objects[-1].grid(row = 0, column = 0, pady = 5)
+    objects.append(ttk.Radiobutton(objects[-2], text = 'On', value = True, variable = tf))
+    objects[-1].grid(row = 1, column = 0, pady = 5)
+    objects.append(ttk.Radiobutton(objects[-3], text = 'Off', value = False, variable = tf))
+    objects[-1].grid(row = 2, column = 0, pady = 5)
 
     objects.append(ttk.Frame(root)) #OBJECTS[8], [10], [12]
-    objects[-1].pack(pady = 5)
+    objects[-1].pack(pady = 10)
     objects.append(ttk.Frame(root)) #OBJECTS[9], [11], [13]
-    objects[-1].pack(pady = 2)
+    objects[-1].pack(pady = 10)
 
     if numPlayers == 2:
-        objects.append(Label(objects[9], text = "", fg = errorcolor))
-        objects.append(ttk.Button(objects[8], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[10], hold, objects[2], objects[4])))
+        objects.append(Label(objects[-1], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[-3], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[-2], hold, tf, objects[2], objects[4])))
     elif numPlayers == 3:
-        objects.append(Label(objects[11], text = "", fg = errorcolor))
-        objects.append(ttk.Button(objects[10], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[12], hold, objects[2], objects[4], objects[6])))
+        objects.append(Label(objects[-1], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[-3], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[-2], hold, tf, objects[2], objects[4], objects[6])))
     else:
-        objects.append(Label(objects[13], text = "", fg = errorcolor))
-        objects.append(ttk.Button(objects[12], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[14], hold, objects[2], objects[4], objects[6], objects[8])))
+        objects.append(Label(objects[-1], text = "", fg = errorcolor))
+        objects.append(ttk.Button(objects[-3], text = "Confirm", command = lambda: confirm_player_names(numPlayers, names, objects[-2], hold, tf, objects[2], objects[4], objects[6], objects[8])))
     objects[-1].pack(pady = 5)
 
     root.wait_variable(hold)
@@ -71,7 +74,7 @@ def playerNames(root, inputs):
 
     return(names)
 
-def confirm_player_names(numPlayers, names, error_label, hold, player1_entry, player2_entry, player3_entry = 0, player4_entry = 0):
+def confirm_player_names(numPlayers, names, error_label, hold, tf, player1_entry, player2_entry, player3_entry = 0, player4_entry = 0):
     if player1_entry.get() == "":
         print(error_label)
         helper.throw_error(error_label, message = "Error: Please enter name for player 1")
@@ -88,6 +91,9 @@ def confirm_player_names(numPlayers, names, error_label, hold, player1_entry, pl
                 helper.throw_error(error_label, message = "Error: Please enter name for player 4")
                 return
 
+    print(tf)
+
+    names.append(tf)
     names.append(player1_entry.get())
     names.append(player2_entry.get())
     if numPlayers > 2:

@@ -1,7 +1,9 @@
+from screeninfo import get_monitors
+import horizontalSetup
+import verticalSetup
 from tkinter import *
 import playerNames
 import subprocess
-import gameSetup
 import importlib
 import sv_ttk
 import Game
@@ -9,7 +11,7 @@ import os
 import sys
 
 CURR_YEAR = 2024
-REQUIRED_FILES = ['Game.py', 'gameSetup.py', 'helper.py', 'playerNames.py', 'merged_batter_data.csv', 'merged_pitcher_data.csv', 'season_name_batters.csv', 'season_name_pitchers.csv']
+REQUIRED_FILES = ['Game.py', 'horizontalSetup.py', 'verticalSetup.py', 'helper.py', 'playerNames.py', 'merged_batter_data.csv', 'merged_pitcher_data.csv', 'season_name_batters.csv', 'season_name_pitchers.csv']
 
 def check_python():
     try:
@@ -72,7 +74,13 @@ def main():
     window_destroy = False
     while True:
         print('NEW GAME!')
-        inputs = gameSetup.gameSetup(root)
+
+        monitor = get_monitors()[0]
+        monitor.height = 1080
+        if monitor.height > 1080:
+            inputs = verticalSetup.gameSetup(root)
+        else:
+            inputs = horizontalSetup.gameSetup(root)
         if inputs[0] == -1:
             window_destroy = True
             break

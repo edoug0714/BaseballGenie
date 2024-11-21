@@ -81,8 +81,11 @@ class Game:
         self.startGame()
 
     def create_players(self, names):
-        #Randomly assign draft order
-        random.shuffle(names)
+        if names[0].get():
+            names.pop(0)
+            random.shuffle(names)
+        else:
+            names.pop(0)
 
         self.player1 = Player(names[0])
         self.player1.teams_needed = self.set_division(CURR_YEAR, self.division)
