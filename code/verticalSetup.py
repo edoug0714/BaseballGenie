@@ -150,7 +150,7 @@ def gameSetup(root):
     objects.append(ttk.Button(objects[48], text = "Confirm Settings", command = lambda: set_years(start_year, end_year, objects[29], objects[31], objects[50], division, hold)))
     objects[-1].pack(pady = 5)
 
-
+    #Hold screen until confirm button is pressed
     root.wait_variable(hold)
 
     list.append(numPlayers.get())
@@ -163,23 +163,13 @@ def gameSetup(root):
     list.append(errorcolor.get())
     list.append(teamscar.get())
 
+    #Clear screen and objects list
     if list[0] != -1:
         for obj in objects:
             obj.destroy()
         objects.clear()
 
     return list
-
-def set_num_players(value, numPlayers, success):
-    success.set("1")
-    numPlayers.set(value)
-
-def set_division(value, division):
-    division.set(value)
-
-def set_stat(value, stat, success):
-    success.set("1")
-    stat.set(value)
 
 def set_years(start_year, end_year, year1_entry, year2_entry, error_label, division, hold):
     #Check for year1 entry
@@ -190,30 +180,42 @@ def set_years(start_year, end_year, year1_entry, year2_entry, error_label, divis
     if year2_entry.get() == "":
         helper.throw_error(error_label, message = "Error: Please enter year values.")
         return
+    #Verify years are integers
     if not (year1_entry.get().isnumeric() or (year2_entry.get().isnumeric())):
         helper.throw_error(error_label, message = "Error: Years must be formatted as numbers.")
         return
 
     start_year.set(year1_entry.get())
     end_year.set(year2_entry.get())
+
+    #Verify start year is less than end year
     if start_year.get() > end_year.get():
         helper.throw_error(error_label, message = "Error: Please make sure start year < end year.")
         return
+    #Verify start year is not in the future
     if start_year.get() > CURR_YEAR:
         helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from the future.")
         return
+    #Verify end year is not from before 1901
     if end_year.get() < 1901:
         helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from before 1901.")
         return
+    #Verify division games start after 1969
     if (division.get() in ["ALW", "ALC", "ALE", "NLW", "NLC", "NLE"]) & (end_year.get() < 1969):
         helper.throw_error(error_label, message = f"Error: Divisions did not exist before 1969.")
         return
+    #Verify central division games start after 1994
     if (division.get() in ["ALC", "NLC"]) & (end_year.get() < 1994):
         helper.throw_error(error_label, message = "Error: Central divisions did not exist before 1994.")
         return
+    
+    #Edit year ranges if out of scope
     if division in ["ALC", "NLC"]:
         if start_year.get() < 1994:
             start_year.set(1993)
+    elif division in ["ALW", "ALE", "NLW", "NLE"]:
+        if start_year.get() < 1969:
+            start_year.set(1969)
     else:
         if start_year.get() < 1901:
             start_year.set(1901)

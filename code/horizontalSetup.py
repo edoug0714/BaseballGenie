@@ -15,6 +15,7 @@ def gameSetup(root):
     root.geometry("1020x400")
     root.protocol("WM_DELETE_WINDOW", lambda: (helper.on_close(list, root), hold.set(True)))
 
+    #Format frame to fill screen and have 6 columns, 3 rows
     objects.append(ttk.Frame(root)) #OBJECTS[0] ORIGINAL FRAME
     objects[-1].pack(fill = 'both', expand = 'True')
     for i in range(6):
@@ -131,7 +132,7 @@ def gameSetup(root):
     objects.append(ttk.Radiobutton(objects[43], text = 'Light', value = 'light', variable = theme, width = 4, command = lambda: (sv_ttk.set_theme('light'), backgroundcolor.set("#fafafa"), changeerrorcolor(objects, 'red', errorcolor))))
     objects[-1].grid(row = 0, column = 1, padx = 5, pady = 5, sticky = 'nsew')
 
-    #Display buttons for text color
+    #Change color for text color radiobuttons
     style = ttk.Style()
     style.configure('Ocean.TRadiobutton', foreground = '#39957b', font = ('Fixedsys', 10))
     style.configure('Ruby.TRadiobutton', foreground = '#cd3f32', font = ('Fixedsys', 10))
@@ -140,6 +141,7 @@ def gameSetup(root):
     style.configure('Lime.TRadiobutton', foreground = '#aee916', font = ('Fixedsys', 10))
     style.configure('Tulip.TRadiobutton', foreground = '#9415ea', font = ('Fixedsys', 10))
 
+    #Display buttons for text color
     objects.append(Frame(objects[0])) #OBJECTS[46]
     objects[-1].grid(row = 4, column = 2, rowspan = 2, padx = 25, pady = 10, sticky = 'nsew')
     objects.append(Label(objects[46], text = "Text Color", font=('System', 12), fg = '#39957b'))
@@ -168,6 +170,7 @@ def gameSetup(root):
     objects.append(ttk.Button(objects[55], text = "Confirm Settings", command = lambda: set_years(start_year, end_year, objects[21], objects[23], objects[57], division, hold)))
     objects[-1].pack(pady = 5)
 
+    #Hold screen until confirm button is pressed
     root.wait_variable(hold)
 
     list.append(numPlayers.get())
@@ -180,24 +183,13 @@ def gameSetup(root):
     list.append(errorcolor.get())
     list.append(teamscar.get())
 
+    #Clear screen and objects list
     if list[0] != -1:
         for obj in objects:
             obj.destroy()
         objects.clear()
 
     return list
-
-
-def set_num_players(value, numPlayers, success):
-    success.set("1")
-    numPlayers.set(value)
-
-def set_division(value, division):
-    division.set(value)
-
-def set_stat(value, stat, success):
-    success.set("1")
-    stat.set(value)
 
 def set_years(start_year, end_year, year1_entry, year2_entry, error_label, division, hold):
     #Check for year1 entry
@@ -208,30 +200,42 @@ def set_years(start_year, end_year, year1_entry, year2_entry, error_label, divis
     if year2_entry.get() == "":
         helper.throw_error(error_label, message = "Error: Please enter year values.")
         return
+    #Verify years are integers
     if not (year1_entry.get().isnumeric() or (year2_entry.get().isnumeric())):
         helper.throw_error(error_label, message = "Error: Years must be formatted as numbers.")
         return
 
     start_year.set(year1_entry.get())
     end_year.set(year2_entry.get())
+
+    #Verify start year is less than end year
     if start_year.get() > end_year.get():
         helper.throw_error(error_label, message = "Error: Please make sure start year < end year.")
         return
+    #Verify start year is not in the future
     if start_year.get() > CURR_YEAR:
         helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from the future.")
         return
+    #Verify end year is not from before 1901
     if end_year.get() < 1901:
         helper.throw_error(error_label, message = "Error: Sorry, we do not have stats from before 1901.")
         return
+    #Verify division games start after 1969
     if (division.get() in ["ALW", "ALC", "ALE", "NLW", "NLC", "NLE"]) & (end_year.get() < 1969):
         helper.throw_error(error_label, message = f"Error: Divisions did not exist before 1969.")
         return
+    #Verify central division games start after 1994
     if (division.get() in ["ALC", "NLC"]) & (end_year.get() < 1994):
         helper.throw_error(error_label, message = "Error: Central divisions did not exist before 1994.")
         return
+    
+    #Edit year ranges if out of scope
     if division in ["ALC", "NLC"]:
         if start_year.get() < 1994:
             start_year.set(1993)
+    elif division in ["ALW", "ALE", "NLW", "NLE"]:
+        if start_year.get() < 1969:
+            start_year.set(1969)
     else:
         if start_year.get() < 1901:
             start_year.set(1901)

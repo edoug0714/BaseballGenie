@@ -1,6 +1,4 @@
-from screeninfo import get_monitors
 import horizontalSetup
-import verticalSetup
 from tkinter import *
 import playerNames
 import subprocess
@@ -74,13 +72,7 @@ def main():
     window_destroy = False
     while True:
         print('NEW GAME!')
-
-        monitor = get_monitors()[0]
-        monitor.height = 1080
-        if monitor.height > 1080:
-            inputs = verticalSetup.gameSetup(root)
-        else:
-            inputs = horizontalSetup.gameSetup(root)
+        inputs = horizontalSetup.gameSetup(root)
         if inputs[0] == -1:
             window_destroy = True
             break

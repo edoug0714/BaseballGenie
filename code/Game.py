@@ -24,6 +24,7 @@ class Player:
         self.num_rp = 0
         self.name = name
         self.teams_needed = []
+
         self.catcher = Pick("", "C", 0)
         self.first_base = Pick("", "1B", 0)
         self.second_base = Pick("", "2B", 0)
@@ -47,12 +48,13 @@ class Player:
         self.rp2 = Pick("", "RP", 0)
         self.rp3 = Pick("", "RP", 0)
         self.rp4 = Pick("", "RP", 0)
+
         self.total = 0
 
 class Game:
     def __init__(self, root, inputs, names):
         self.root = root
-        self.play_again = False
+        self.play_again = BooleanVar(value = False)
         self.prev_player = ""
         self.prev_division = []
         self.picked_players = []
@@ -66,6 +68,7 @@ class Game:
         self.errorcolor = inputs[7]
         self.teamscar = inputs[8]
 
+        #Read correct datafile depending on batter/pitcher
         if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
             self.data = pd.read_csv("../data/merged_batter_data.csv").fillna(0)
             self.data.drop(columns=self.data.columns[0], axis=1, inplace=True)
@@ -76,11 +79,13 @@ class Game:
             self.season_name = pd.read_csv("../data/season_name_pitchers.csv").fillna(0)
             self.season_name = self.season_name['x'].tolist()
 
+        #Finish game setup
         self.create_players(names)
         self.set_division_tf()
         self.startGame()
 
     def create_players(self, names):
+        #If random order was enabled, shuffle
         if names[0].get():
             names.pop(0)
             random.shuffle(names)
@@ -99,6 +104,7 @@ class Game:
                 self.player4.teams_needed = self.set_division(CURR_YEAR, self.division)
 
     def set_division_tf(self):
+        #Check if game is for specific division
         if self.division in ['MLB', 'AL', 'NL']:
             self.division_tf = False
         else:
@@ -111,16 +117,16 @@ class Game:
             self.root.geometry("1500x620")
         else:
             self.root.geometry("1800x620")
-        #sv_ttk.set_theme('dark')
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close)
 
-        self.objects = []
+        self.objects = [] #Stores all tkinter objects for easy clearing of screen
         self.objects.append(ttk.Frame(self.root))
         self.objects[-1].pack(fill = 'both', expand = 'True')
         self.objects[-1].columnconfigure(0, weight = 1)
         self.objects[-1].columnconfigure(1, weight = 1)
         self.objects[-1].columnconfigure(2, weight = 1)
 
+        #Pack the 3 columns used for game screen
         self.objects.append(ttk.Frame(self.objects[0])) #WAS LEFT FRAME NOW self.objects[1]
         self.objects[-1].grid(row = 0, column = 0, sticky = "nsw", padx = (10, 5), pady = 10)
         self.objects.append(ttk.Frame(self.objects[0])) #WAS RIGHT FRAME NOW self.objects[2]
@@ -138,31 +144,31 @@ class Game:
             if self.numPlayers > 3:
                 self.player4.player_objects = player_objects[3]
 
+        #If team scarcity is on, set remteams to correct division
         if (self.division == 'AL') or (self.division == 'NL') or (self.division == 'MLB'):
             if self.teamscar:
                 if self.division == 'AL': self.remteams = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX']
                 elif self.division == 'NL': self.remteams = ['ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
                 else: self.remteams = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX', 'ATL', 'MIA', 'NYM', 'PHI', 'WSN', 'CHC', 'CIN', 'MIL', 'PIT', 'STL', 'ARI', 'COL', 'LAD', 'SDP', 'SFG']
 
+                #If there are more picks in draft than length of remteams, double remteams (each team can be picked twice)
                 while self.numPlayers * 9 > len(self.remteams):
                     self.remteams += self.remteams
-
-                print(self.remteams)
+        #If specific division is selected, ensure team scarcity is False
         else:
             self.teamscar = False
 
-        self.exit = False
         #START OF MAIN GAME LOOP
+        self.exit = False
         for i in draft_order:
-        #for i in [0, 1]:
             objects = []
             print(f'Loop {i}: {self.exit}')
             if self.exit:
                 break
             if i < len(player):
                 self.turn(self.objects[3], player[i], objects)
-            print('exit')
             
+            #Clear screen after each turn
             if not self.exit:
                 for obj in objects:
                     obj.destroy
@@ -171,27 +177,24 @@ class Game:
         if self.exit:
             return
 
+        #Clear screen before displaying results
         for obj in objects:
             obj.destroy()
         objects.clear()
 
-        play_again = BooleanVar(self.root)
-        play_again.set(False)
-
+        #Display finishing order
         if self.numPlayers == 2:
             players = [self.player1, self.player2]
         elif self.numPlayers == 3:
             players = [self.player1, self.player2, self.player3]
         else:
             players = [self.player1, self.player2, self.player3, self.player4]
-
         if self.stat == 'AVG':
             sorted_players = sorted(players, key=lambda player: player.total / player.ab, reverse=True)
         if self.stat == 'ERA':
             sorted_players = sorted(players, key=lambda player: 9 * player.total / player.ip, reverse=False)
         else:
             sorted_players = sorted(players, key=lambda player: player.total, reverse=True)
-
         objects.append(Label(self.objects[3], text = f'1st: {sorted_players[0].name}', font = ('System', 50), fg = '#FFD700'))
         objects[-1].grid(row = 0, column = 0, padx = 5, pady = 0)
         objects.append(Label(self.objects[3], text = f'2nd: {sorted_players[1].name}', font = ('System', 40), fg = '#9e9d8f'))
@@ -203,14 +206,20 @@ class Game:
                 objects.append(Label(self.objects[3], text = f'4th: {sorted_players[3].name}', font = ('System', 20), fg = 'white'))
                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
 
-        objects.append(ttk.Button(self.objects[3], text = "Play Again", command = lambda: (play_again.set(True))))
-        objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
-        self.objects[3].wait_variable(play_again)
+        self.top_remaining(self.objects[3], self.objects)
 
+        #Display play again button and hold screen until it is pressed or game is exited
+        objects.append(ttk.Button(self.objects[3], text = "Play Again", command = lambda: (self.play_again.set(True))))
+        objects[-1].grid(row = 9, column = 0, padx = 5, pady = 25)
+
+        self.root.wait_variable(self.play_again)
+
+        #Clear rankings from screen
         for obj in objects:
             obj.destroy()
         objects.clear()
 
+        #Destroy frame and grid objects
         for obj in self.objects:
             obj.destroy()
         self.objects.clear()
@@ -247,19 +256,24 @@ class Game:
         return draft_order, player
 
     def paste_player(self, left_frame, right_frame):
+        #Player 2 on right
         if self.numPlayers == 2:
             player1_frame = left_frame
             player2_frame = right_frame
+        #Players 3/4 on right
         else:
             player1_frame = left_frame
             player2_frame = left_frame
 
+        #Determine which layout to use based on stat
         if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
             pos = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH', 'Total']
         elif self.stat == 'W':
             pos = ['SP', 'SP', 'SP', 'SP', 'SP', 'SP', 'SP', 'SP', 'SP', 'Total']
         else:
             pos = ['SP', 'SP', 'SP', 'SP', 'SP', 'RP', 'RP', 'RP', 'RP', 'Total']
+
+        #Create objects to display each player's draft selections and score
         player1_obj = []
         player2_obj = []
         player3_obj = []
@@ -276,6 +290,7 @@ class Game:
                     player4_obj.append(ttk.Label(right_frame, text = f'{pos[i]}:'))
                     player4_obj[i].grid(row = i + 1, column = 1, padx = 25, pady = 5)
             
+        #Add teams needed objects if divisional game
         if self.division_tf:
             player1_obj.append(Label(player1_frame, text = 'Teams Needed', font = ('Fixedsys', 10), fg = self.textcolor))
             player1_obj[10].grid(row = 11, column = 0, padx = 25, pady = 5)
@@ -300,6 +315,7 @@ class Game:
         return player_objects
 
     def turn(self, center_frame, player, objects):
+        #Class that handles the dropdown search menu for player selection
         class AutoCompleteDropdown(Game):
             def __init__(self, game_instance, frame, options):
                 self.game = game_instance
@@ -315,17 +331,21 @@ class Game:
                 objects.append(ttk.Button(frame, text="Confirm", command = lambda: (self.confirm_selection()))) #SELF.CONFIRM_BUTTON NOW OBJECTS[6]
                 objects[6].grid(row = 6, column = 0, pady = 10)
 
+            #Every time user types a character, update list to show matches
             def update_list(self, event=None):
                 typed_text = objects[4].get().lower()
 
+                #Do not start displaying matches until 4 characters (year) have been typed
                 if len(typed_text) >= 4:
                     self.filtered_options = [option for option in self.options if typed_text in option.lower()]
                     objects[5].delete(0, END) 
                     for option in self.filtered_options:
                         objects[5].insert(END, option)
+                #If less than 4 characters, do not show matches
                 else:
                     objects[5].delete(0, END)
 
+            #Allows users to click on player they want
             def select_option(self, event):
                 selection = objects[5].curselection()
                 if selection:
@@ -334,6 +354,7 @@ class Game:
                     objects[4].insert(0, selected_option)
                     objects[5].grid_forget()
 
+            #Displays confirm button
             def confirm_selection(self):
                 if len(objects[4].get().split()) >= 2:
                     year = objects[4].get().split(' ', 1)[0]
@@ -342,7 +363,8 @@ class Game:
                     player.temp_year = int(year)
                     self.game.loop1.set(True)
 
-        print(f'Called turn() - Player {player.name}\'s Turn')
+        #Start of each individual turn
+        #print(f'Called turn() - Player {player.name}\'s Turn')
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.loop1 = BooleanVar(self.root)
         self.loop2 = BooleanVar(self.root)
@@ -356,7 +378,7 @@ class Game:
 
         self.errorcode = -1
         while self.loop1.get() == False:
-            print('While loop 1 called')
+            #print('While loop 1 called')
             self.loop1.set(False)
             self.loop2.set(False)
             self.loop3.set(False)
@@ -379,8 +401,10 @@ class Game:
 
             #Display previous selection's top 3 seasons in division and year range
             self.prev_player_stats(center_frame, objects)
+            #Display remaining teams
             self.remaining_teams(center_frame, objects)
 
+            #Display errors if error has been flagged
             if self.errorcode == 0:
                 helper.throw_error(objects[-1], message = "Error: Player does not exist.", row = 12)
             elif self.errorcode == 1:
@@ -391,15 +415,18 @@ class Game:
                 helper.throw_error(objects[-1], message = f'Error: {", ".join(franchises)} are not available.', row = 12)
             elif self.errorcode == 4:
                 helper.throw_error(objects[-1], message = f'Error: Year is out of range.', row = 12)
+            elif self.errorcode == 5:
+                helper.throw_error(objects[-1], message = f'Error: Player already selected.', row = 12)
             self.errorcode = -1
 
             #Wait variable that holds screen until player is selected
             center_frame.wait_variable(self.loop1)
 
             while self.loop2.get() == False:
-                print('While loop 2 called')
+                #print('While loop 2 called')
+                
+                #Get division layout from selected year
                 division = self.set_division(player.temp_year, self.division)
-                self.picked_players.append(player.temp_name)
                 self.multiple_positions = False
                 player_stats = self.data
                 player_stats = player_stats[player_stats['Name'] == player.temp_name]
@@ -413,6 +440,7 @@ class Game:
                     common_teams_fra = []
                 common_teams_need = np.intersect1d(teams, player.teams_needed)
 
+                #Throw errors
                 skiploop2 = False
                 if (player.temp_year < self.start_year) or (player.temp_year > self.end_year):
                     self.errorcode = 4
@@ -424,22 +452,31 @@ class Game:
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
+                elif player.temp_name in self.picked_players:
+                    self.errorcode = 5
+                    skiploop2 = True
+                    self.loop2.set(True)
+                    self.loop1.set(False)
                 elif (len(common_teams_div) == 0) & (not self.teamscar):
+                    self.picked_players.append(player.temp_name)
                     self.errorcode = 1
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
                 elif (len(common_teams_need) == 0) & (player.rem_turns == len(player.teams_needed)) & (not self.teamscar):
+                    self.picked_players.append(player.temp_name)
                     self.errorcode = 2
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
                 elif (len(common_teams_fra) == 0) & (self.teamscar):
+                    self.picked_players.append(player.temp_name)
                     self.errorcode = 3
                     skiploop2 = True
                     self.loop2.set(True)
                     self.loop1.set(False)
                 else:
+                    self.picked_players.append(player.temp_name)
 
                 #Batting stats
                     if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
@@ -466,26 +503,43 @@ class Game:
                             objects[i].destroy()
                         objects = objects[:1]
 
+                        #Remove DH if present in positions
                         if 'DH' in pos:
                             pos.remove('DH')
+                        #If player is not qualified at any positions, add DH back
                         if len(pos) == 0:
                             pos.append('DH')
                         adj_pos = []
                         for i in pos:
                             adj_pos.append(i)
-                        teams = season_stats['Team']
 
-                        if (len(set(adj_pos)) <= len(set(teams))) & (len(set(teams)) != 1):
-                            team1_stats = season_stats[season_stats['Team'] == teams[0]]
-                            team2_stats = season_stats[season_stats['Team'] == teams[1]]
+                        #Deals with players who played on multiple teams in the same season
+                        teams = season_stats['Team'].unique().tolist()
+                        if len(set(teams)) != 1:
+                            #Remove teams that were already selected
+                            if self.teamscar:
+                                for t in teams:
+                                    if t not in self.remteams:
+                                        teams.remove(t)
                             if self.stat == "AVG":
-                                val = team1_stats['H'].iloc[0]
+                                season_stats = season_stats.sort_values(by = ['H'], ascending = False)
                             else:
-                                val = team1_stats[self.stat].iloc[0] + team2_stats[self.stat].iloc[0]
+                                season_stats = season_stats.sort_values(by = [self.stat], ascending = False)
+                            team_stats = season_stats[season_stats['Team'] == teams[0]]
+                            player.temp_team = team_stats['Team'].iloc[0]
+                            player.temp_franchise = team_stats['Franchise'].iloc[0]
+                            if self.stat == "AVG":
+                                val = team_stats['H'].iloc[0]
+                                player.temp_ab = team_stats['AB'].iloc[0]
+                            else:
+                                val = team_stats[self.stat].iloc[0]
                             adj_pos = list(set(adj_pos))
+
+                        #Display eligible positions
                         objects.append(Label(center_frame, text = f'{player.temp_name} is eligible at {", ".join(adj_pos)}.'))
                         objects[1].grid(row = 1, column = 0, padx = 5, pady = 5)
 
+                        #Remove positions that player already has
                         if 'C' in pos:
                             if player.catcher.name != "":
                                 adj_pos.remove('C')
@@ -515,15 +569,19 @@ class Game:
                                 adj_pos.remove('DH')
                         if 'P' in pos:
                             adj_pos.remove('P')
+                        pos = list(set(pos))
 
+                        #Player has all eligible positions filled
                         if len(adj_pos) == 0:
                             objects.append(Label(center_frame, text = f'You do not have {", ".join(pos)} available.'))
                             objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
+                            #DH is also filled -> pick again
                             if player.hitter.name != "":
                                 objects.append(Label(center_frame, text = f'You do not have DH available.'))
                                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
                                 objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                                 objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+                            #DH is available -> use as DH
                             else:
                                 objects.append(Label(center_frame, text = f'You have DH available.'))
                                 objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
@@ -533,6 +591,7 @@ class Game:
                                 objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
                                 objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                                 objects[-1].grid(row = 5, column = 0, padx = 5, pady = 5)
+                        #Player has 1 eligible position open -> use at that position
                         elif(len(adj_pos) == 1):
                             objects.append(Label(center_frame, text = f'You have {", ".join(adj_pos)} available.'))
                             objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
@@ -540,6 +599,7 @@ class Game:
                             objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+                        #Player has multiple eligible positions open -> choose position
                         else:
                             while self.loop2.get() == False:
                                 print('While loop 3 called')
@@ -565,8 +625,10 @@ class Game:
                                 #Holds program until position is selected
                                 center_frame.wait_variable(self.loop3)
 
+                            #Skips loop2 waitvariable since player is already selected
                             skiploop2 = True
 
+                            #Clear screen before next turn
                             for obj in objects:
                                 obj.destroy()
                             objects.clear()
@@ -604,6 +666,38 @@ class Game:
                             num_starters = 9
                         else:
                             num_starters = 5
+
+                        #Deals with players who played on multiple teams in the same season
+                        teams = season_stats['Team'].unique().tolist()
+                        if len(set(teams)) != 1:
+                            #Remove teams that were already selected
+                            if self.teamscar:
+                                for t in teams:
+                                    if t not in self.remteams:
+                                        teams.remove(t)
+                            if self.stat == "ERA":
+                                season_stats = season_stats.sort_values(by = ['ERA'], ascending = True)
+                            else:
+                                season_stats = season_stats.sort_values(by = [self.stat], ascending = False)
+                            team_stats = season_stats[season_stats['Team'] == teams[0]]
+                            player.temp_team = team_stats['Team'].iloc[0]
+                            player.temp_franchise = team_stats['Franchise'].iloc[0]
+                            if self.stat == "ERA":
+                                val = team_stats['ER'].iloc[0]
+                                player.temp_ip = team_stats['IP'].iloc[0]
+                            else:
+                                val = team_stats[self.stat].iloc[0]
+
+                        #Change IP from 0.1, 0.2 version to 0.33 or 0.67
+                        if player.temp_ip - int(player.temp_ip) > 0.15:
+                            player.temp_ip = int(player.temp_ip) + 0.67
+                        elif player.temp_ip - int(player.temp_ip) > 0.05:
+                            player.temp_ip = int(player.temp_ip) + 0.33
+                        else:
+                            player.temp_ip = int(player.temp_ip)
+
+
+                        #Qualifies as RP but SP only -> pick again
                         if (pos[0] == 'RP') & (num_starters == 9):
                             helper.throw_error(objects[-1], message = f"Error: {player.temp_name} is not a SP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
@@ -611,6 +705,7 @@ class Game:
                             objects[5].destroy()
                             objects[6].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+                        #Qualifies as RP and RP filled -> pick again
                         elif (pos[0] == 'RP') & (player.num_rp == 4):
                             helper.throw_error(objects[-1], message = f"Error: Max number of RP reached. Please select a SP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
@@ -618,6 +713,7 @@ class Game:
                             objects[5].destroy()
                             objects[6].destroy()
                             objects[-1].grid(row = 4, column = 0, padx = 5, pady = 5)
+                        #Qualifies as SP and SP filled -> pick again
                         elif (pos[0] == 'SP') & (player.num_sp == 5) & (num_starters == 5):
                             helper.throw_error(objects[-1], message = f"Error: Max number of SP reached. Please select a RP.", row = len(objects) - 1)
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
@@ -636,60 +732,28 @@ class Game:
                             objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
                             objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
 
-                #If/else statement seperating batters and pitchers rejoins here
-                #if self.multiple_positions:
-                    #objects.append(ttk.Label(center_frame, text = f'Select {player.temp_name} at {", ".join(adj_pos)}.'))
-                    #objects[-1].grid(row = 1, column = 0, padx = 5, pady = 5)
-                    #objects.append(ttk.Button(center_frame, text = f'Confirm', command = lambda: self.select_player(player, adj_pos, val, division)))
-                    #objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
-                    #objects.append(ttk.Button(center_frame, text = "Select New Player", command = lambda: (self.loop2.set(True), self.loop1.set(False))))
-                    #objects[-1].grid(row = 3, column = 0, padx = 5, pady = 5)
-
                 #Holds program until selection is confirmed
                 if not skiploop2:
                     center_frame.wait_variable(self.loop2)
 
+            #Clear screen for next pick
             for obj in objects:
                 obj.destroy()
             objects.clear()
 
+        #If program closed, return
         if self.exit:
             return
 
+    #Defines what program does when closed
     def on_close(self):
         self.loop1.set(True)
         self.loop2.set(True)
+        self.play_again.set(True)
         self.exit = True
         quit(self.root)
-
-    def verify_entry(self, player, objects):
-        if len(objects[4].get().split(' ', 1)) > 1:
-            if objects[4].get().split(' ', 1)[0].isdigit():
-                year = objects[4].get().split(' ', 1)[0]
-                name = objects[4].get().split(' ', 1)[1]
-            else:
-                helper.throw_error(objects[-1], message = "Error: Check format of entry.", row = len(objects) - 1)
-                objects[4].delete(0, END)
-                return
-        else:
-            helper.throw_error(objects[-1], message = "Error: Check format of entry.", row = len(objects) - 1)
-            objects[4].delete(0, END)
-            return
-
-        if (int(year) < self.start_year) or (int(year) > self.end_year):
-            helper.throw_error(objects[-1], message = "Error: Year out of range.", row = len(objects) - 1)
-            objects[4].delete(0, END)
-            return
-        
-        if name in self.picked_players:
-            helper.throw_error(objects[-1], message = "Error: Player already selected.", row = len(objects) - 1)
-            objects[4].delete(0, END)
-            return
-
-        self.loop1.set(True)
-        player.temp_name = name
-        player.temp_year = int(year)
     
+    #Since divisions change over time, necessary to set divisions based on what year was selected
     def set_division(self, year, div):
         if div == "ALW":
             if (year < 1970):
@@ -790,7 +854,6 @@ class Game:
                 division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'LAA', 'OAK', 'SEA', 'TEX']
             elif (year > 2012):
                 division = ['BAL', 'BOS', 'NYY', 'TBR', 'TOR', 'CHW', 'CLE', 'DET', 'KCR', 'MIN', 'HOU', 'LAA', 'OAK', 'SEA', 'TEX']
-
         elif div == "NL":
             if year < 1903:
                 division = ['BSN', 'BRO', 'CHI', 'CIN', 'NYG', 'PHI', 'PIT', 'STL']
@@ -823,13 +886,7 @@ class Game:
 
         return(division)
 
-    def verify_position(self, positions, pos):
-        self.loop3.set(True)
-        self.loop2.set(True)
-        self.loop1.set(True)
-        positions.clear()
-        positions.append(pos)
-
+    #After batter is selected and passes checks, this function processes the pick
     def select_player(self, player, pos, val, division):
         position = pos[0]
         
@@ -888,10 +945,12 @@ class Game:
             elif self.stat == 'WAR': player.player_objects[8].config(text = f'DH: {player.temp_name} [{round(val, 1):.1f}]')
             else: player.player_objects[8].config(text = f'DH: {player.temp_name} [{val}]')
 
+        #Update prev_player for top years display
         self.prev_player = player.temp_name
         self.prev_division = division
         player.rem_turns -= 1
 
+        #Update player total
         if self.stat == 'AVG':
             player.ab += player.temp_ab
             player.total += val
@@ -904,10 +963,12 @@ class Game:
             player.total += val
             player.player_objects[9].config(text = f'Total: {round(player.total)}')
 
+        #Remove team from needed teams if divisional game
         if self.division_tf:
             if player.temp_team in player.teams_needed: 
                 player.teams_needed.remove(player.temp_team)
             player.player_objects[11].config(text = f'{", ".join(player.teams_needed)}')
+        #Remove team from remaining teams if team scarcity is on
         elif self.teamscar:
             indices = [i for i, val in enumerate(self.remteams) if val == player.temp_franchise]
             if len(indices) > 1:
@@ -918,6 +979,7 @@ class Game:
         self.loop2.set(True)
         self.loop3.set(True)
 
+    #After pitcher is selected and passes checks, this function processes the pick
     def select_pitcher(self, player, pos, val, division):
         if pos[0] == 'SP':
             if player.num_sp == 0:
@@ -1000,15 +1062,18 @@ class Game:
                 elif self.stat == 'PWAR': player.player_objects[8].config(text = f'RP: {player.temp_name} [{round(val, 1):.1f}]')
                 else: player.player_objects[8].config(text = f'RP: {player.temp_name} [{val}]')
 
+        #Update prev_player for top years display
         self.prev_player = player.temp_name
         self.prev_division = division
         player.rem_turns -= 1
 
+        #Update RP or SP count
         if pos[0] == 'SP':
             player.num_sp += 1
         else:
             player.num_rp += 1
 
+        #Update player total
         if self.stat == 'ERA':
             player.ip += player.temp_ip
             player.total += val
@@ -1018,10 +1083,12 @@ class Game:
             player.total += val
             player.player_objects[9].config(text = f'Total: {round(player.total, 1)}')
 
+        #Remove team from needed teams if divisional game
         if self.division_tf:
             if player.temp_team in player.teams_needed: 
                 player.teams_needed.remove(player.temp_team)
             player.player_objects[11].config(text = f'{", ".join(player.teams_needed)}')
+        #Remove team from remaining teams if team scarcity is on
         elif self.teamscar:
             indices = [i for i, val in enumerate(self.remteams) if val == player.temp_team]
             if len(indices) > 1:
@@ -1031,6 +1098,7 @@ class Game:
 
         self.loop2.set(True)
 
+    #Displays top seasons list at bottom of screen
     def prev_player_stats(self, center_frame, objects):
         if self.prev_player != "":
             player_stats = self.data
@@ -1045,6 +1113,7 @@ class Game:
                 season_stats = season_stats.sort_values(by = 'WAR', ascending = False).drop_duplicates(subset = 'Season', keep = 'first')
             else:
                 season_stats = season_stats.sort_values(by = self.stat, ascending = False).drop_duplicates(subset = 'Season', keep = 'first')
+            #Display top 3 seasons
             if (len(season_stats) > 2):
                 objects.append(ttk.Label(center_frame, text = f'Top 3 {self.prev_player} seasons in {self.division}:'))
                 objects[-1].grid(row = 7, column = 0, padx = 5, pady = 10)
@@ -1053,6 +1122,7 @@ class Game:
                 elif (self.stat == 'PWAR') or (self.stat == 'WAR'): objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {round(season_stats['WAR'].iloc[0], 3):.1f}     {season_stats['Season'].iloc[1]}: {round(season_stats['WAR'].iloc[1], 3):.1f}     {season_stats['Season'].iloc[2]}: {round(season_stats['WAR'].iloc[2], 3):.1f}"))
                 else: objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {season_stats[self.stat].iloc[0]}     {season_stats['Season'].iloc[1]}: {season_stats[self.stat].iloc[1]}     {season_stats['Season'].iloc[2]}: {season_stats[self.stat].iloc[2]}"))
                 objects[-1].grid(row = 8, column = 0, padx = 5, pady = 5)
+            #Display only 2 seasons
             elif (len(season_stats) > 1):
                 objects.append(ttk.Label(center_frame, text = f'{self.prev_player}\'s seasons in {self.division}:'))
                 objects[-1].grid(row = 7, column = 0, padx = 5, pady = 10)
@@ -1061,6 +1131,7 @@ class Game:
                 elif (self.stat == 'PWAR') or (self.stat == 'WAR'): objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {round(season_stats['WAR'].iloc[0], 3):.1f}     {season_stats['Season'].iloc[1]}: {round(season_stats['WAR'].iloc[1], 3):.1f}"))
                 else: objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {season_stats[self.stat].iloc[0]}     {season_stats['Season'].iloc[1]}: {season_stats[self.stat].iloc[1]}"))
                 objects[-1].grid(row = 8, column = 0, padx = 5, pady = 5)
+            #Display only season
             elif (len(season_stats) > 0):
                 objects.append(ttk.Label(center_frame, text = f'{self.prev_player}\'s seasons in {self.division}:'))
                 objects[-1].grid(row = 7, column = 0, padx = 5, pady = 10)
@@ -1070,6 +1141,7 @@ class Game:
                 else: objects.append(ttk.Label(center_frame, text = f"{season_stats['Season'].iloc[0]}: {season_stats[self.stat].iloc[0]}"))
                 objects[-1].grid(row = 8, column = 0, padx = 5, pady = 5)
 
+    #Displays remaining team list at bottom of screen
     def remaining_teams(self, center_frame, objects):
         if self.teamscar:
             rem_teams_set = sorted(set(self.remteams))
@@ -1096,6 +1168,7 @@ class Game:
             objects.append(Label(center_frame, text = "", fg = self.errorcolor))
             #objects[-1].grid(row = 9, column = 0, padx = 5, pady = 5)
 
+    #Returns name of stat to display
     def stat_disp(self):
         if self.stat == 'H':
             return 'Hits'
@@ -1109,6 +1182,75 @@ class Game:
             return 'SBs'
         else:
             return self.stat
-
-
         
+    def top_remaining(self, center_frame, objects):
+        print(self.picked_players)
+        data = self.data[~self.data['Name'].isin(self.picked_players)]
+        data = data[data['Franchise'].isin(self.set_division(CURR_YEAR, self.division))]
+        data = data[(data['Season'] >= self.start_year) & (data['Season'] <= self.end_year)]
+        if self.stat == 'AVG':
+            data['AVG'] = data['H'] / data['AB']
+            data = data[data['AB'] >= 500]
+            data = data.sort_values(by = [self.stat], ascending = False)
+        elif self.stat == 'ERA':
+            data = data[data['IP'] >= 150]
+            data = data.sort_values(by = [self.stat], ascending = True)
+        elif self.stat == 'PWAR':
+            data = data.sort_values(by = ['WAR'], ascending = False)
+        else:
+            data = data.sort_values(by = [self.stat], ascending = False)
+
+        if self.stat in ['SB', 'H', 'HR']:
+            objects.append(ttk.Label(center_frame, text = "Best remaning picks:"))
+            objects[-1].grid(row = 5, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[0]} {data['Franchise'].iloc[0]} {data['Pos'].iloc[0]} {data['Name'].iloc[0]} - {data[self.stat].iloc[0]}"))
+            objects[-1].grid(row = 6, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[1]} {data['Franchise'].iloc[1]} {data['Pos'].iloc[0]} {data['Name'].iloc[1]} - {data[self.stat].iloc[1]}"))
+            objects[-1].grid(row = 7, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[2]} {data['Franchise'].iloc[2]} {data['Pos'].iloc[2]} {data['Name'].iloc[2]} - {data[self.stat].iloc[2]}"))
+            objects[-1].grid(row = 8, column = 0, pady = 5)
+        elif self.stat == 'AVG':
+            objects.append(ttk.Label(center_frame, text = "Best remaning picks:"))
+            objects[-1].grid(row = 5, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[0]} {data['Franchise'].iloc[0]} {data['Pos'].iloc[0]} {data['Name'].iloc[0]} - {round(data[self.stat].iloc[0], 3):.3f}"))
+            objects[-1].grid(row = 6, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[1]} {data['Franchise'].iloc[1]} {data['Pos'].iloc[0]} {data['Name'].iloc[1]} - {round(data[self.stat].iloc[1], 3):.3f}"))
+            objects[-1].grid(row = 7, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[2]} {data['Franchise'].iloc[2]} {data['Pos'].iloc[2]} {data['Name'].iloc[2]} - {round(data[self.stat].iloc[2], 3):.3f}"))
+            objects[-1].grid(row = 8, column = 0, pady = 5)
+        elif self.stat == 'WAR':
+            objects.append(ttk.Label(center_frame, text = "Best remaning picks:"))
+            objects[-1].grid(row = 5, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[0]} {data['Franchise'].iloc[0]} {data['Pos'].iloc[0]} {data['Name'].iloc[0]} - {round(data['WAR'].iloc[0], 1):.1f}"))
+            objects[-1].grid(row = 6, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[1]} {data['Franchise'].iloc[1]} {data['Pos'].iloc[1]} {data['Name'].iloc[1]} - {round(data['WAR'].iloc[1], 1):.1f}"))
+            objects[-1].grid(row = 7, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[2]} {data['Franchise'].iloc[2]} {data['Pos'].iloc[2]} {data['Name'].iloc[2]} - {round(data['WAR'].iloc[2], 1):.1f}"))
+            objects[-1].grid(row = 8, column = 0, pady = 5)
+        elif self.stat == 'ERA':
+            objects.append(ttk.Label(center_frame, text = "Best remaning picks:"))
+            objects[-1].grid(row = 5, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[0]} {data['Franchise'].iloc[0]} SP {data['Name'].iloc[0]} - {round(data[self.stat].iloc[0], 2):.2f} over {data['IP'].iloc[0]} IP"))
+            objects[-1].grid(row = 6, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[1]} {data['Franchise'].iloc[1]} SP {data['Name'].iloc[1]} - {round(data[self.stat].iloc[1], 2):.2f} over {data['IP'].iloc[1]} IP"))
+            objects[-1].grid(row = 7, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[2]} {data['Franchise'].iloc[2]} SP {data['Name'].iloc[2]} - {round(data[self.stat].iloc[2], 2):.2f} over {data['IP'].iloc[2]} IP"))
+            objects[-1].grid(row = 8, column = 0, pady = 5)
+        elif self.stat == 'PWAR':
+            objects.append(ttk.Label(center_frame, text = "Best remaning picks:"))
+            objects[-1].grid(row = 5, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[0]} {data['Franchise'].iloc[0]} P {data['Name'].iloc[0]} - {round(data['WAR'].iloc[0], 1):.1f}"))
+            objects[-1].grid(row = 6, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[1]} {data['Franchise'].iloc[1]} P {data['Name'].iloc[1]} - {round(data['WAR'].iloc[1], 1):.1f}"))
+            objects[-1].grid(row = 7, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[2]} {data['Franchise'].iloc[2]} P {data['Name'].iloc[2]} - {round(data['WAR'].iloc[2], 1):.1f}"))
+            objects[-1].grid(row = 8, column = 0, pady = 5)
+        else:
+            objects.append(ttk.Label(center_frame, text = "Best remaning picks:"))
+            objects[-1].grid(row = 5, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[0]} {data['Franchise'].iloc[0]} P {data['Name'].iloc[0]} - {data[self.stat].iloc[0]}"))
+            objects[-1].grid(row = 6, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[1]} {data['Franchise'].iloc[1]} P {data['Name'].iloc[1]} - {data[self.stat].iloc[1]}"))
+            objects[-1].grid(row = 7, column = 0, pady = 5)
+            objects.append(ttk.Label(center_frame, text = f"{data['Season'].iloc[2]} {data['Franchise'].iloc[2]} P {data['Name'].iloc[2]} - {data[self.stat].iloc[2]}"))
+            objects[-1].grid(row = 8, column = 0, pady = 5)
