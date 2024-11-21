@@ -893,57 +893,57 @@ class Game:
         if position == 'C':
             player.catcher.name = player.temp_name
             player.catcher.total = val
-            if self.stat == 'AVG': player.player_objects[0].config(text = f'C: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[0].config(text = f'C: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[0].config(text = f'C: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[0].config(text = f'C: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[0].config(text = f'C: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[0].config(text = f'C: {player.temp_year} {player.temp_name} [{val}]')
         elif position == '1B':
             player.first_base.name = player.temp_name
             player.first_base.total = val
-            if self.stat == 'AVG': player.player_objects[1].config(text = f'1B: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[1].config(text = f'1B: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[1].config(text = f'1B: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[1].config(text = f'1B: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[1].config(text = f'1B: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[1].config(text = f'1B: {player.temp_year} {player.temp_name} [{val}]')
         elif position == '2B':
             player.second_base.name = player.temp_name
             player.second_base.total = val
-            if self.stat == 'AVG': player.player_objects[2].config(text = f'2B: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[2].config(text = f'2B: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[2].config(text = f'2B: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[2].config(text = f'2B: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[2].config(text = f'2B: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[2].config(text = f'2B: {player.temp_year} {player.temp_name} [{val}]')
         elif position == '3B':
             player.third_base.name = player.temp_name
             player.third_base.total = val
-            if self.stat == 'AVG': player.player_objects[3].config(text = f'3B: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[3].config(text = f'3B: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[3].config(text = f'3B: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[3].config(text = f'3B: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[3].config(text = f'3B: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[3].config(text = f'3B: {player.temp_year} {player.temp_name} [{val}]')
         elif position == 'SS':
             player.short_stop.name = player.temp_name
             player.short_stop.total = val
-            if self.stat == 'AVG': player.player_objects[4].config(text = f'SS: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[4].config(text = f'SS: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[4].config(text = f'SS: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[4].config(text = f'SS: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[4].config(text = f'SS: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[4].config(text = f'SS: {player.temp_year} {player.temp_name} [{val}]')
         elif position == 'LF':
             player.left_field.name = player.temp_name
             player.left_field.total = val
-            if self.stat == 'AVG': player.player_objects[5].config(text = f'LF: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[5].config(text = f'LF: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[5].config(text = f'LF: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[5].config(text = f'LF: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[5].config(text = f'LF: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[5].config(text = f'LF: {player.temp_year} {player.temp_name} [{val}]')
         elif position == 'CF':
             player.center_field.name = player.temp_name
             player.center_field.total = val
-            if self.stat == 'AVG': player.player_objects[6].config(text = f'CF: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[6].config(text = f'CF: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[6].config(text = f'CF: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[6].config(text = f'CF: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[6].config(text = f'CF: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[6].config(text = f'CF: {player.temp_year} {player.temp_name} [{val}]')
         elif position == 'RF':
             player.right_field.name = player.temp_name
             player.right_field.total = val
-            if self.stat == 'AVG': player.player_objects[7].config(text = f'RF: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[7].config(text = f'RF: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[7].config(text = f'RF: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[7].config(text = f'RF: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[7].config(text = f'RF: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[7].config(text = f'RF: {player.temp_year} {player.temp_name} [{val}]')
         elif position == 'DH':
             player.hitter.name = player.temp_name
             player.hitter.total = val
-            if self.stat == 'AVG': player.player_objects[8].config(text = f'DH: {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
-            elif self.stat == 'WAR': player.player_objects[8].config(text = f'DH: {player.temp_name} [{round(val, 1):.1f}]')
-            else: player.player_objects[8].config(text = f'DH: {player.temp_name} [{val}]')
+            if self.stat == 'AVG': player.player_objects[8].config(text = f'DH: {player.temp_year} {player.temp_name} [{round(val / player.temp_ab, 3):.3f}]')
+            elif self.stat == 'WAR': player.player_objects[8].config(text = f'DH: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+            else: player.player_objects[8].config(text = f'DH: {player.temp_year} {player.temp_name} [{val}]')
 
         #Update prev_player for top years display
         self.prev_player = player.temp_name
@@ -985,82 +985,82 @@ class Game:
             if player.num_sp == 0:
                 player.sp1.name = player.temp_name
                 player.sp1.total = val
-                if self.stat == 'ERA': player.player_objects[0].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[0].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[0].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[0].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[0].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[0].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 1:
                 player.sp2.name = player.temp_name
                 player.sp2.total = val
-                if self.stat == 'ERA': player.player_objects[1].config(text = f'SP: {player.temp_name} [{round(9* val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[1].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[1].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[1].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9* val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[1].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[1].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 2:
                 player.sp3.name = player.temp_name
                 player.sp3.total = val
-                if self.stat == 'ERA': player.player_objects[2].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[2].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[2].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[2].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[2].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[2].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 3:
                 player.sp4.name = player.temp_name
                 player.sp4.total = val
-                if self.stat == 'ERA': player.player_objects[3].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[3].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[3].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[3].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[3].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[3].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 4:
                 player.sp5.name = player.temp_name
                 player.sp5.total = val
-                if self.stat == 'ERA': player.player_objects[4].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[4].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[4].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[4].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[4].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[4].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 5:
                 player.sp6.name = player.temp_name
                 player.sp6.total = val
-                if self.stat == 'ERA': player.player_objects[5].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[5].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[5].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[5].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[5].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[5].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 6:
                 player.sp7.name = player.temp_name
                 player.sp7.total = val
-                if self.stat == 'ERA': player.player_objects[6].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[6].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[6].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[6].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[6].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[6].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 7:
                 player.sp8.name = player.temp_name
                 player.sp8.total = val
-                if self.stat == 'ERA': player.player_objects[7].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[7].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[7].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[7].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[7].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[7].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_sp == 8:
                 player.sp9.name = player.temp_name
                 player.sp9.total = val
-                if self.stat == 'ERA': player.player_objects[8].config(text = f'SP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[8].config(text = f'SP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[8].config(text = f'SP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[8].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[8].config(text = f'SP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[8].config(text = f'SP: {player.temp_year} {player.temp_name} [{val}]')
         else:
             if player.num_rp == 0:
                 player.rp1.name = player.temp_name
                 player.rp1.total = val
-                if self.stat == 'ERA': player.player_objects[5].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[5].config(text = f'RP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[5].config(text = f'RP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[5].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[5].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[5].config(text = f'RP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_rp == 1:
                 player.rp2.name = player.temp_name
                 player.rp2.total = val
-                if self.stat == 'ERA': player.player_objects[6].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[6].config(text = f'RP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[6].config(text = f'RP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[6].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[6].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[6].config(text = f'RP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_rp == 2:
                 player.rp3.name = player.temp_name
                 player.rp3.total = val
-                if self.stat == 'ERA': player.player_objects[7].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[7].config(text = f'RP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[7].config(text = f'RP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[7].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[7].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[7].config(text = f'RP: {player.temp_year} {player.temp_name} [{val}]')
             elif player.num_rp == 3:
                 player.rp4.name = player.temp_name
                 player.rp4.total = val
-                if self.stat == 'ERA': player.player_objects[8].config(text = f'RP: {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
-                elif self.stat == 'PWAR': player.player_objects[8].config(text = f'RP: {player.temp_name} [{round(val, 1):.1f}]')
-                else: player.player_objects[8].config(text = f'RP: {player.temp_name} [{val}]')
+                if self.stat == 'ERA': player.player_objects[8].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(9 * val / player.temp_ip, 2)}]')
+                elif self.stat == 'PWAR': player.player_objects[8].config(text = f'RP: {player.temp_year} {player.temp_name} [{round(val, 1):.1f}]')
+                else: player.player_objects[8].config(text = f'RP: {player.temp_year} {player.temp_name} [{val}]')
 
         #Update prev_player for top years display
         self.prev_player = player.temp_name
