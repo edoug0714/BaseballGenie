@@ -1,10 +1,10 @@
 # Title
 
 ## Rules
-Set a year range: Picks will only be accepted from within this range. \
-Select a division: Picks will only be accepted from this division. Select MLB for no limits. \
-Select a stat to draft: Try to build a full roster with more of this stat than your opponent. \
-Start drafting: Select a single season from an athlete's career. You will recieve the total amount of the chosen stat that they accrued that season.
+**Set a year range:** Picks will only be accepted from within this range. \
+**Select a division:** Picks will only be accepted from this division. Select MLB for no limits. \
+**Select a stat to draft:** Try to build a full roster with more of this stat than your opponent. \
+**Start drafting:** Select a single season from an athlete's career. You will recieve the total amount of the chosen stat that they accrued that season.
 
 ## Gamemodes
 
