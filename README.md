@@ -33,3 +33,35 @@ Themes are powered by [sv_ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)
 
 ![Alt Text](images/darkmode.png)
 
+## Color Options
+
+### Ocean
+
+![Alt Text](images/ocean.png)
+![Alt Text](images/ocean_layout.png)
+
+### Ruby
+
+![Alt Text](images/ruby.png)
+![Alt Text](images/ruby_layout.png)
+
+### Spooky
+
+![Alt Text](images/spooky.png)
+![Alt Text](images/spooky_layout.png)
+
+### Rose
+
+![Alt Text](images/rose.png)
+![Alt Text](images/rose_layout.png)
+
+### Lime
+
+![Alt Text](images/lime.png)
+![Alt Text](images/lime_layout.png)
+
+### Tulip
+
+![Alt Text](images/tulip.png)
+![Alt Text](images/tulip_layout.png)
+
