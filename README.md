@@ -3,13 +3,13 @@
 
 ### Division
 Players can only pick athletes from the selected division. \
-Each player must pick at least one athlete from each franchise currently in the selected division. \
+Each player must pick at least one athlete from each franchise currently in the selected division. 
 
 ![Alt Text](images/division.png)
 
 ### Team Scarcity
 Players can only pick athletes from the selected league (AL, NL, MLB). \
-Once a player selects an athlete, their respective franchise cannot be used again. \
+Once a player selects an athlete, their respective franchise cannot be used again. 
 
 ![Alt Text](images/team_scarcity.png)
 
