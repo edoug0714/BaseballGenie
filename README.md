@@ -6,6 +6,10 @@
 **Select a stat to draft:** Try to build a full roster with more of this stat than your opponent. \
 **Start drafting:** Select a single season from an athlete's career. You will recieve the total amount of the chosen stat they accrued that season.
 
+### Prove to your friends that you know ball!
+
+![Alt Text](images/winscreen.png)
+
 ## Gamemodes
 
 ### Division
