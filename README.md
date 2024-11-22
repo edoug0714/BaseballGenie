@@ -17,4 +17,6 @@ Once a player selects an athlete, their respective franchise cannot be used agai
 Players can only pick athletes from the selected league (AL, NL, MLB). \
 Players can select as many athletes from the same franchise as they want.
 
+![Alt Text](images/team_free-for-all.png)
+
 
