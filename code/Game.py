@@ -67,6 +67,7 @@ class Game:
         self.backgroundcolor = inputs[6]
         self.errorcolor = inputs[7]
         self.teamscar = inputs[8]
+        self.cumstats = False
 
         #Read correct datafile depending on batter/pitcher
         if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:

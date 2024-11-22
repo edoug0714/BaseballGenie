@@ -12,13 +12,13 @@ def gameSetup(root):
     backgroundcolor = StringVar(value = "#1c1c1c")
     errorcolor = StringVar(value = 'yellow')
     textcolor = StringVar(value = '#39957b')
-    root.geometry("1020x400")
+    root.geometry("1020x435")
     root.protocol("WM_DELETE_WINDOW", lambda: (helper.on_close(list, root), hold.set(True)))
 
     #Format frame to fill screen and have 6 columns, 3 rows
     objects.append(ttk.Frame(root)) #OBJECTS[0] ORIGINAL FRAME
     objects[-1].pack(fill = 'both', expand = 'True')
-    for i in range(6):
+    for i in range(8):
         objects[-1].grid_rowconfigure(i, weight=1)
     for i in range(3):
         root.grid_columnconfigure(i, weight=1)
@@ -255,7 +255,7 @@ def changetextcolor(objects, color):
     objects[47].config(fg = color)
 
 def changeerrorcolor(objects, color, errorcolor):
-    objects[50].config(fg = color)
+    objects[57].config(fg = color)
     errorcolor.set(color)
 
 
