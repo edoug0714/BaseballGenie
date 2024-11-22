@@ -22,4 +22,14 @@ Players can select as many athletes from the same franchise as they want.
 
 ![Alt Text](images/free-for-all.png)
 
+## Themes
+Themes are powered by [sv_ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)
+
+### Dark Mode
+
+![Alt Text](images/darkmode.png)
+
+### Light Mode
+
+![Alt Text](images/lightmode.png)
 
