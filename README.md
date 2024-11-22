@@ -1,22 +1,26 @@
 # Title
+
+## Rules
+Set a year range: Picks will only be accepted from within this range. \
+Select a division: Picks will only be accepted from this division. Select MLB for no limits. \
+Select a stat to draft: Try to build a full roster with more of this stat than your opponent. \
+Start drafting: Select a single season from an athlete's career. You will recieve the total amount of the chosen stat that they accrued that season.
+
 ## Gamemodes
 
 ### Division
-Pick an athlete from a single season. \
 Players can only pick athletes from the selected division. \
 Each player must pick at least one athlete from each franchise currently in the selected division. 
 
 ![Alt Text](images/division.png)
 
 ### Team Scarcity
-Pick an athlete from a single season. \
 Players can only pick athletes from the selected league (AL, NL, MLB). \
 Once a player selects an athlete, their respective franchise cannot be used again. 
 
 ![Alt Text](images/team_scarcity.png)
 
 ### Free for All:
-Pick an athlete from a single season. \
 Players can only pick athletes from the selected league (AL, NL, MLB). \
 Players can select as many athletes from the same franchise as they want.
 
