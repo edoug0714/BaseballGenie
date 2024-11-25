@@ -1,4 +1,4 @@
-# Baseball Draft Game
+# Welcome to StatGenie!
 
 ## Rules
 **Set a year range:** Picks will only be accepted from within this range. \
