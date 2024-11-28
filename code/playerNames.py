@@ -82,7 +82,6 @@ def playerNames(root, inputs):
 def confirm_player_names(numPlayers, names, error_label, hold, tf, player1_entry, player2_entry, player3_entry = 0, player4_entry = 0):
     #Verify player1 entry is not empty
     if player1_entry.get() == "":
-        print(error_label)
         helper.throw_error(error_label, message = "Error: Please enter name for player 1")
         return
     #Verify player2 entry is not empty

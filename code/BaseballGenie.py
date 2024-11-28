@@ -18,10 +18,10 @@ def check_python():
         if result.returncode == 0:
             print(f"Python is installed: {result.stdout.strip()}")
         else:
-            print("Python is not installed.")
+            print("Python is not installed. You can download the latest version from here: https://www.python.org/downloads/")
             exit(1)
     except FileNotFoundError:
-        print("Python is not installed.")
+        print("Python is not installed. You can download the latest version from here: https://www.python.org/downloads/")
         exit(1)
 
 def check_requirements():
@@ -50,7 +50,6 @@ def check_files():
     for file in REQUIRED_FILES:
         try:
             file_path = pathlib.Path(sys._MEIPASS) / file
-            print(file_path)
             if not os.path.isfile(file_path):
                 missing_files.append(file)
         except Exception as e:
@@ -67,7 +66,6 @@ def main():
     sv_ttk.set_theme('dark')
     window_destroy = False
     while True:
-        print('NEW GAME!')
         inputs = horizontalSetup.gameSetup(root)
         if inputs[0] == -1:
             window_destroy = True
@@ -77,8 +75,6 @@ def main():
             window_destroy = True
             break
         game = Game.Game(root, inputs, names)
-
-        print("Made it to the end")
 
         if game.exit:
             break

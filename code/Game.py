@@ -168,8 +168,8 @@ class Game:
         #START OF MAIN GAME LOOP
         self.exit = False
         for i in draft_order:
+            #print(f'Loop {i}: {self.exit}')
             objects = []
-            print(f'Loop {i}: {self.exit}')
             if self.exit:
                 break
             if i < len(player):
@@ -609,7 +609,7 @@ class Game:
                         #Player has multiple eligible positions open -> choose position
                         else:
                             while self.loop2.get() == False:
-                                print('While loop 3 called')
+                                #print('While loop 3 called')
                                 objects.append(Label(center_frame, text = f'You have {", ".join(adj_pos)} available.'))
                                 objects[-1].grid(row = 2, column = 0, padx = 5, pady = 5)
                                 objects.append(Label(center_frame, text = f'Select position you would like {player.temp_name} at.'))
@@ -961,7 +961,6 @@ class Game:
         if self.stat == 'AVG':
             player.ab += player.temp_ab
             player.total += val
-            print(f'{player.temp_name}: {val} / {player.temp_ab}, {player.total} / {player.ab}')
             player.player_objects[9].config(text = f'Average: {round(player.total / player.ab, 3):.3f}')
         elif self.stat == 'WAR':
             player.total += val
@@ -1084,7 +1083,6 @@ class Game:
         if self.stat == 'ERA':
             player.ip += player.temp_ip
             player.total += val
-            print(f'{player.temp_name}: {val} / {player.temp_ip}, {player.total} / {player.ip}')
             player.player_objects[9].config(text = f'Average: {round(9 * player.total / player.ip, 2)}')
         else:
             player.total += val
@@ -1191,7 +1189,6 @@ class Game:
             return self.stat
         
     def top_remaining(self, center_frame, objects):
-        print(self.picked_players)
         data = self.data[~self.data['Name'].isin(self.picked_players)]
         data = data[data['Franchise'].isin(self.set_division(CURR_YEAR, self.division))]
         data = data[(data['Season'] >= self.start_year) & (data['Season'] <= self.end_year)]
