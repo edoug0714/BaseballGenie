@@ -2,8 +2,10 @@ from tkinter import ttk
 from tkinter import *
 import pandas as pd
 import numpy as np
+import pathlib
 import random
 import helper
+import sys
 
 CURR_YEAR = 2024
 
@@ -71,13 +73,17 @@ class Game:
 
         #Read correct datafile depending on batter/pitcher
         if self.stat in ['WAR', 'H', 'HR', 'SB', 'AVG']:
-            self.data = pd.read_csv("../data/merged_batter_data.csv").fillna(0)
+            data_path = pathlib.Path(sys._MEIPASS) / "data/merged_batter_data.csv"
+            season_name_path = pathlib.Path(sys._MEIPASS) / "data/season_name_batters.csv"
+            self.data = pd.read_csv(data_path).fillna(0)
             self.data.drop(columns=self.data.columns[0], axis=1, inplace=True)
-            self.season_name = pd.read_csv("../data/season_name_batters.csv").fillna(0)
+            self.season_name = pd.read_csv(season_name_path).fillna(0)
             self.season_name = self.season_name['x'].tolist()
         else:
-            self.data = pd.read_csv("../data/merged_pitcher_data.csv").fillna(0)
-            self.season_name = pd.read_csv("../data/season_name_pitchers.csv").fillna(0)
+            data_path = pathlib.Path(sys._MEIPASS) / "data/merged_pitcher_data.csv"
+            season_name_path = pathlib.Path(sys._MEIPASS) / "data/season_name_pitchers.csv"
+            self.data = pd.read_csv(data_path).fillna(0)
+            self.season_name = pd.read_csv(season_name_path).fillna(0)
             self.season_name = self.season_name['x'].tolist()
 
         #Finish game setup
