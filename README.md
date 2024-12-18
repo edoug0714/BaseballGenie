@@ -1,4 +1,4 @@
-# Welcome to StatGenie!
+# Welcome to BaseballGenie!
 
 ## Rules
 **Set a year range:** Picks will only be accepted from within this range. \
